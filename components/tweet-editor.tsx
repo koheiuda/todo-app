@@ -119,7 +119,7 @@ export function TweetEditor({ articleUrl, drafts }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">ツイート案（4人体制 + 編集長推薦）</CardTitle>
+        <CardTitle className="text-base">ツイート案（宇田晃平｜SEOコンサルタント）</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={active} onValueChange={setActive}>
@@ -184,17 +184,65 @@ export function TweetEditor({ articleUrl, drafts }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-3">
-          <Button disabled={pending} onClick={() => submit(false)}>
-            予約投稿
-          </Button>
-          <Button
-            disabled={pending}
-            variant="secondary"
-            onClick={() => submit(true)}
-          >
-            いますぐ投稿
-          </Button>
+        <div className="mt-6 flex flex-col gap-3">
+          {/* Primary: free copy-paste flow */}
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              size="lg"
+              className="bg-[#1e2a4a] hover:bg-[#2d4fd4] text-white"
+              onClick={() => {
+                const draft = drafts[Number(active)];
+                if (!draft) return;
+                const body = bodies[draft.id];
+                const url = `https://x.com/intent/post?text=${encodeURIComponent(body)}`;
+                window.open(url, "_blank", "noopener,noreferrer");
+                toast.success("X.comの投稿画面を開きました", {
+                  description: "内容を確認して「ポスト」をクリックしてください",
+                });
+              }}
+            >
+              X.comで開いて投稿（無料）
+            </Button>
+            <p className="text-xs text-gray-500">
+              本文がプリセットされたX投稿画面が別タブで開きます。内容を確認して手動で「ポスト」を押してください。
+            </p>
+          </div>
+
+          {/* Secondary: paid API flow */}
+          <details className="border rounded-lg p-3 bg-gray-50">
+            <summary className="text-xs text-gray-600 cursor-pointer select-none">
+              ⚡ X API経由の自動投稿（要$5+チャージ）
+            </summary>
+            <div className="mt-3 space-y-3">
+              <Button
+                type="button"
+                disabled={pending}
+                variant="outline"
+                size="sm"
+                onClick={() => submit(true)}
+              >
+                {pending ? "投稿中…" : "いますぐAPI投稿"}
+              </Button>
+              <div className="flex items-end gap-2">
+                <Button
+                  type="button"
+                  disabled={pending}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => submit(false)}
+                >
+                  予約投稿
+                </Button>
+                <span className="text-xs text-gray-400">↑ 上の予約日時欄で日時指定</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                X API有料化により、API投稿は1件 $0.025〜$0.20 のクレジット消費が発生します。
+                クレジット未補充だと <code className="text-[10px]">402 CreditsDepleted</code> エラー、
+                権限不足だと <code className="text-[10px]">403 Forbidden</code> エラーになります。
+              </p>
+            </div>
+          </details>
         </div>
       </CardContent>
     </Card>
