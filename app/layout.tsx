@@ -1,22 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Noto_Sans_JP } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { TodoProvider } from "@/components/todo/todo-context";
+import { Header } from "@/components/header";
+import { Sidebar } from "@/components/sidebar";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSansJp = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "SEO News X",
-  description: "SEOニュースを集約してXに自動投稿するアプリ",
+  title: "ToDo + SEO News X",
+  description: "ToDo管理とSEOニュース自動投稿の統合アプリ",
 };
 
 export default function RootLayout({
@@ -25,27 +23,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-        <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-6">
-            <Link href="/" className="font-semibold">
-              SEO News X
-            </Link>
-            <div className="flex gap-4 text-sm">
-              <Link href="/" className="hover:underline">ニュース</Link>
-              <Link href="/scheduled" className="hover:underline">予約一覧</Link>
-              <Link href="/settings" className="hover:underline">設定</Link>
-            </div>
-          </nav>
-        </header>
-        <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-          {children}
-        </main>
-        <Toaster richColors position="top-right" />
+    <html lang="ja" className={`${notoSansJp.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-gray-100 text-gray-900">
+        <TodoProvider>
+          <Header />
+          <div className="flex-1 flex gap-5 p-5 max-w-6xl mx-auto w-full">
+            <Sidebar />
+            <main className="flex-1 min-w-0">{children}</main>
+          </div>
+          <Toaster richColors position="top-right" />
+        </TodoProvider>
       </body>
     </html>
   );
