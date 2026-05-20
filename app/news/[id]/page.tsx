@@ -71,7 +71,7 @@ export default async function ArticleDetailPage({
           <div className="flex justify-end">
             <RegenerateDraftButton articleId={article.id} />
           </div>
-          <TweetEditor articleUrl={article.url} drafts={drafts} />
+          <TweetEditor drafts={drafts} />
         </div>
       )}
     </div>

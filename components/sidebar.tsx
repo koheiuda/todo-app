@@ -17,7 +17,6 @@ const viewMenu: ViewMenuItem[] = [
 
 const routeMenu: RouteMenuItem[] = [
   { href: "/news", icon: "📰", label: "SEO News" },
-  { href: "/scheduled", icon: "⏰", label: "予約投稿" },
   { href: "/settings", icon: "⚙️", label: "設定" },
 ];
 
