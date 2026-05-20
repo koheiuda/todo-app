@@ -3,6 +3,7 @@ import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { articles, tweetDrafts } from "@/lib/db/schema";
 import { TweetEditor } from "@/components/tweet-editor";
+import { RegenerateDraftButton } from "@/components/regenerate-draft-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatJst } from "@/lib/format";
@@ -60,12 +61,18 @@ export default async function ArticleDetailPage({
 
       {drafts.length === 0 ? (
         <Card>
-          <CardContent className="pt-6 text-sm text-gray-500">
-            ツイート案がまだ生成されていません。
+          <CardContent className="pt-6 text-sm text-gray-500 flex items-center justify-between gap-3">
+            <span>ツイート案がまだ生成されていません。</span>
+            <RegenerateDraftButton articleId={article.id} variant="default" />
           </CardContent>
         </Card>
       ) : (
-        <TweetEditor articleUrl={article.url} drafts={drafts} />
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <RegenerateDraftButton articleId={article.id} />
+          </div>
+          <TweetEditor articleUrl={article.url} drafts={drafts} />
+        </div>
       )}
     </div>
   );

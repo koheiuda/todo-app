@@ -22,7 +22,7 @@ const buildPrompt = (drafts: DraftOutput[]): string => `
 ${drafts
   .map(
     (d, i) =>
-      `--- 案${i + 1}（${d.persona.name} / ${d.charCount}字）---\n${d.body}`
+      `--- 案${i + 1}（${d.personaName} / ${d.charCount}字）---\n${d.body}`
   )
   .join("\n\n")}
 

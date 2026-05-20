@@ -55,6 +55,22 @@ export type ThreadPostResult = {
 };
 
 /**
+ * Strip "▼詳細はこちら" line + the URL line that follows it, plus any URL
+ * matching the provided string. Used by tree mode so the main tweet stays
+ * URL-free ($0.015 instead of $0.20).
+ */
+export function stripUrlBlock(body: string, url?: string | null): string {
+  let out = body;
+  // Remove "▼詳細はこちら\n<URL>" block (with optional surrounding blank lines)
+  out = out.replace(/\n*▼\s*詳細はこちら\s*\n?\s*https?:\/\/\S+\s*$/m, "");
+  out = out.replace(/\n*▼\s*詳細はこちら\s*\n?/m, "");
+  if (url) {
+    out = out.split(url).join("");
+  }
+  return out.trimEnd();
+}
+
+/**
  * Post a tweet — optionally with a URL reply attached for cost optimization.
  *
  * Tree mode: post main body without URL ($0.015), then reply with URL ($0.01).
@@ -67,10 +83,13 @@ export async function postTweetThread(opts: {
 }): Promise<ThreadPostResult> {
   const accessToken = await getValidAccessToken();
 
-  const main = await postOne({ accessToken, text: opts.body });
+  const mainText = opts.treeMode
+    ? stripUrlBlock(opts.body, opts.url)
+    : opts.body;
+  const main = await postOne({ accessToken, text: mainText });
 
   if (opts.treeMode && opts.url) {
-    const replyText = `詳細はこちら ▼\n${opts.url}`;
+    const replyText = `▼詳細はこちら\n${opts.url}`;
     const reply = await postOne({
       accessToken,
       text: replyText,

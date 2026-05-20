@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DEFAULT_PERSONAS } from "@/lib/config/personas";
+import { PRIMARY_PERSONA } from "@/lib/config/personas";
 import { DEFAULT_RSS_FEEDS, INCLUDE_KEYWORDS } from "@/lib/config/rss";
 import { db } from "@/lib/db";
 import { xTokens } from "@/lib/db/schema";
@@ -57,20 +57,34 @@ export default async function SettingsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">AI社員ペルソナ（4人体制）</CardTitle>
+          <CardTitle className="text-base">ツイート生成ペルソナ</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          {DEFAULT_PERSONAS.map((p) => (
-            <div key={p.id} className="border rounded p-3">
-              <div className="font-semibold">{p.name}</div>
-              <div className="text-xs text-zinc-500">
-                対象: {p.targetAudience} ／ 口調: {p.tone}
-              </div>
-              <p className="text-xs mt-1">{p.description}</p>
+          <div className="border rounded p-3 bg-gray-50">
+            <div className="font-semibold text-[#1e2a4a]">
+              {PRIMARY_PERSONA.name}
             </div>
-          ))}
-          <p className="text-xs text-zinc-500">
-            ※ DBの settings テーブル経由でGUI編集できる仕組みを後段で追加。
+            <div className="text-xs text-gray-500 mt-1">
+              対象: {PRIMARY_PERSONA.targetAudience}
+            </div>
+            <div className="text-xs text-gray-500">
+              口調: {PRIMARY_PERSONA.tone}
+            </div>
+            <p className="text-xs mt-2">{PRIMARY_PERSONA.description}</p>
+
+            <div className="mt-3">
+              <p className="text-xs font-semibold text-gray-700 mb-1">
+                投稿の構成
+              </p>
+              <ol className="list-decimal list-inside text-xs space-y-0.5 text-gray-600">
+                {PRIMARY_PERSONA.structure.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500">
+            プロンプト本体は <code>lib/agents/drafter.ts</code> に格納。編集はコードで行ってください。
           </p>
         </CardContent>
       </Card>

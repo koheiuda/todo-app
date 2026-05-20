@@ -109,8 +109,13 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:block w-56 shrink-0">
+    <aside className="hidden md:block w-56 shrink-0 space-y-4">
+      {/* ─── Box 1: ToDo ─── */}
       <div className="bg-white rounded-xl shadow-sm p-3">
+        <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
+          ToDo
+        </p>
+
         {/* Workspaces */}
         <div className="space-y-1 mb-2">
           <p className="px-3 pt-1 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide">
@@ -221,9 +226,13 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="border-t border-gray-100 my-2" />
+      </div>
 
-        {/* Other routes */}
+      {/* ─── Box 2: SEO News ─── */}
+      <div className="bg-white rounded-xl shadow-sm p-3">
+        <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
+          SEO News
+        </p>
         <nav className="space-y-1">
           {routeMenu.map((item) => {
             const isActive =
