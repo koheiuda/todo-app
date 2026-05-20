@@ -54,7 +54,46 @@ export function TweetEditor({ articleUrl, drafts }: Props) {
     const finalBody = bodies[draft.id];
 
     startTransition(async () => {
-      const iso = postNow ? new Date().toISOString() : jstInputToIso(scheduledAt);
+      if (postNow) {
+        // Immediate post — call X API directly, bypass schedule queue.
+        const res = await fetch("/api/tweets/post-now", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            draftId: draft.id,
+            bodyFinal: finalBody,
+            treeMode,
+            attachUrl,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          toast.success("投稿しました", {
+            description: data.tweetUrl ? "投稿を表示" : undefined,
+            action: data.tweetUrl
+              ? {
+                  label: "開く",
+                  onClick: () => window.open(data.tweetUrl, "_blank"),
+                }
+              : undefined,
+          });
+          router.push("/scheduled");
+        } else {
+          const err = await res.json().catch(() => ({}));
+          const hint =
+            err.code === "credits_depleted"
+              ? "X APIクレジットを補充してください（Wallet $5+）"
+              : err.error?.includes("tokens not found")
+              ? "/settings から Xアカウントを接続してください"
+              : err.error;
+          toast.error(`投稿失敗`, { description: hint ?? `HTTP ${res.status}` });
+        }
+        return;
+      }
+
+      // Scheduled post — into the queue
+      const iso = jstInputToIso(scheduledAt);
       const res = await fetch("/api/tweets/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,7 +107,7 @@ export function TweetEditor({ articleUrl, drafts }: Props) {
       });
 
       if (res.ok) {
-        toast.success(postNow ? "即時投稿キューに追加しました" : "予約しました");
+        toast.success("予約しました");
         router.push("/scheduled");
       } else {
         const err = await res.json().catch(() => ({}));

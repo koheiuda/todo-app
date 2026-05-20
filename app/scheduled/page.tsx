@@ -4,7 +4,7 @@ import { scheduledPosts, tweetDrafts, articles } from "@/lib/db/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatJst } from "@/lib/format";
-import { CancelButton } from "./cancel-button";
+import { CancelButton, RunNowButton } from "./cancel-button";
 
 export const dynamic = "force-dynamic";
 
@@ -123,7 +123,12 @@ export default async function ScheduledPage() {
                   投稿を見る ▶
                 </a>
               )}
-              {p.status === "pending" && <CancelButton id={p.id} />}
+              {p.status === "pending" && (
+                <div className="flex gap-2">
+                  <RunNowButton id={p.id} />
+                  <CancelButton id={p.id} />
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
