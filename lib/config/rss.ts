@@ -21,4 +21,6 @@ export const EXCLUDE_DOMAINS = [
 
 export const FETCH_HOURS_WINDOW = 24;
 export const MAX_ARTICLES_PER_RUN = 10;
-export const MAX_DRAFTS_PER_RUN = 6;
+// Hobby plan: max 60s per function. Each draft run = 4 Claude calls + 1 editor.
+// 3 articles * 5 calls ≈ 15 calls — fits comfortably in 60s.
+export const MAX_DRAFTS_PER_RUN = 3;
