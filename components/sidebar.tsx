@@ -28,10 +28,19 @@ const accountingMenu: RouteMenuItem[] = [
   { href: "/accounting/import", icon: "📥", label: "データ移行" },
 ];
 
+type Section = "todo" | "news" | "accounting";
+
+function detectSection(pathname: string): Section {
+  if (pathname.startsWith("/accounting")) return "accounting";
+  if (pathname === "/") return "todo";
+  return "news"; // /news, /scheduled, /articles, /settings
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const isTodoRoute = pathname === "/";
+  const section = detectSection(pathname);
 
   const todo = useTodo();
   const {
@@ -117,7 +126,8 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:block w-56 shrink-0 space-y-4">
-      {/* ─── Box 1: ToDo ─── */}
+      {section === "todo" && (
+      /* ─── Box 1: ToDo ─── */
       <div className="bg-white rounded-xl shadow-sm p-3">
         <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
           ToDo
@@ -234,8 +244,10 @@ export function Sidebar() {
         </nav>
 
       </div>
+      )}
 
-      {/* ─── Box 2: SEO News ─── */}
+      {section === "news" && (
+      /* ─── Box 2: SEO News ─── */
       <div className="bg-white rounded-xl shadow-sm p-3">
         <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
           SEO News
@@ -262,8 +274,10 @@ export function Sidebar() {
           })}
         </nav>
       </div>
+      )}
 
-      {/* ─── Box 3: 会計 ─── */}
+      {section === "accounting" && (
+      /* ─── Box 3: 会計 ─── */
       <div className="bg-white rounded-xl shadow-sm p-3">
         <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
           会計
@@ -291,6 +305,7 @@ export function Sidebar() {
           })}
         </nav>
       </div>
+      )}
 
       {contextMenu &&
         portalReady &&
