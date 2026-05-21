@@ -11,3 +11,9 @@ if (!connectionString) {
 const client = postgres(connectionString ?? "", { prepare: false });
 export const db = drizzle(client, { schema });
 export { schema };
+
+// 会計モジュール（mesut-accounting 由来）互換 API。
+// 元コードは `getDb()` で取得していたので、同じ呼び出し口を提供しておく。
+export function getDb() {
+  return db;
+}

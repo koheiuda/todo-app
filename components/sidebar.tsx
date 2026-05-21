@@ -20,6 +20,14 @@ const routeMenu: RouteMenuItem[] = [
   { href: "/settings", icon: "⚙️", label: "設定" },
 ];
 
+const accountingMenu: RouteMenuItem[] = [
+  { href: "/accounting", icon: "📊", label: "ダッシュボード" },
+  { href: "/accounting/months", icon: "📅", label: "月次収支" },
+  { href: "/accounting/invoices", icon: "🧾", label: "請求書" },
+  { href: "/accounting/company", icon: "🏢", label: "自社情報" },
+  { href: "/accounting/import", icon: "📥", label: "データ移行" },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -237,6 +245,35 @@ export function Sidebar() {
             const isActive =
               pathname === item.href ||
               (item.href !== "/" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                  isActive
+                    ? "bg-[#2d4fd4]/10 text-[#2d4fd4]"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-base">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* ─── Box 3: 会計 ─── */}
+      <div className="bg-white rounded-xl shadow-sm p-3">
+        <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
+          会計
+        </p>
+        <nav className="space-y-1">
+          {accountingMenu.map((item) => {
+            const isActive =
+              item.href === "/accounting"
+                ? pathname === "/accounting"
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

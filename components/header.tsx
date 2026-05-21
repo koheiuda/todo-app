@@ -1,29 +1,67 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTodo } from "@/components/todo/todo-context";
 
-const routeTitles: Record<string, string> = {
-  "/": "ToDoリスト",
-  "/news": "SEO News",
-  "/scheduled": "予約投稿",
-  "/settings": "設定",
+type Section = {
+  id: "todo" | "news" | "accounting";
+  label: string;
+  href: string;
+  isActive: (pathname: string) => boolean;
 };
+
+const SECTIONS: Section[] = [
+  {
+    id: "todo",
+    label: "ToDo",
+    href: "/",
+    isActive: (p) => p === "/",
+  },
+  {
+    id: "news",
+    label: "SEO News",
+    href: "/news",
+    isActive: (p) =>
+      p.startsWith("/news") ||
+      p.startsWith("/scheduled") ||
+      p.startsWith("/articles") ||
+      p.startsWith("/settings"),
+  },
+  {
+    id: "accounting",
+    label: "会計",
+    href: "/accounting",
+    isActive: (p) => p.startsWith("/accounting"),
+  },
+];
 
 export function Header() {
   const pathname = usePathname();
   const { activeView, setActiveView } = useTodo();
   const isTodoRoute = pathname === "/";
 
-  const title =
-    Object.entries(routeTitles).find(([k]) =>
-      k === "/" ? pathname === "/" : pathname.startsWith(k)
-    )?.[1] ?? "SEO News X";
-
   return (
     <header className="bg-[#1e2a4a] text-white px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-2xl md:text-3xl font-bold tracking-wide">{title}</p>
+        <nav className="flex items-center gap-1">
+          {SECTIONS.map((s) => {
+            const active = s.isActive(pathname);
+            return (
+              <Link
+                key={s.id}
+                href={s.href}
+                className={`px-4 py-1.5 rounded-md text-base md:text-lg font-bold tracking-wide transition-colors ${
+                  active
+                    ? "bg-white text-[#1e2a4a]"
+                    : "text-white/80 hover:bg-white/10"
+                }`}
+              >
+                {s.label}
+              </Link>
+            );
+          })}
+        </nav>
         {isTodoRoute && (
           <button
             onClick={() =>
