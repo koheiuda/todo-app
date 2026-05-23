@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
   const toDraft = inserted.slice(0, MAX_DRAFTS_PER_RUN);
 
   let drafted = 0;
+  const draftErrors: Array<{ url: string; error: string }> = [];
   for (const article of toDraft) {
     try {
       const draft = await draftOne({
@@ -68,6 +69,8 @@ export async function GET(req: NextRequest) {
       });
       drafted++;
     } catch (err) {
+      const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      draftErrors.push({ url: article.url, error: msg });
       console.error("[fetch-news] draft failed for", article.url, err);
     }
   }
@@ -76,5 +79,6 @@ export async function GET(req: NextRequest) {
     ok: true,
     inserted: inserted.length,
     drafted,
+    ...(draftErrors.length > 0 ? { draftErrors } : {}),
   });
 }
