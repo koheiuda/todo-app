@@ -135,6 +135,8 @@ export function TaskItem({
                   setEditValue(task.title);
                 }}
                 className={`text-sm cursor-pointer select-none truncate ${
+                  isSubtask ? "" : "font-bold"
+                } ${
                   task.completed ? "line-through text-gray-400" : "text-gray-800"
                 }`}
               >
