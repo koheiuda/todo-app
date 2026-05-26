@@ -78,7 +78,9 @@ export function TaskItem({
             ? "bg-[#2d4fd4]/5 border-t-2 border-[#2d4fd4]"
             : task.isToday && !task.completed
             ? "bg-yellow-50 hover:bg-yellow-100"
-            : "hover:bg-gray-50"
+            : isSubtask
+            ? "hover:bg-gray-50"
+            : "bg-gray-100 hover:bg-gray-200"
         } ${isSubtask ? "ml-10" : ""}`}
       >
         <button
