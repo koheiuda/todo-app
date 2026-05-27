@@ -23,8 +23,8 @@ export function OutsourcingRow({
 
   return (
     <tr className="border-b border-neutral-100 last:border-b-0 hover:bg-neutral-50">
-      <td className="px-2 py-3 text-center text-neutral-500 tabular-nums">{index + 1}</td>
-      <td className="px-2 py-2 font-medium text-neutral-900">
+      <td className="px-2 py-2 text-center text-neutral-500 tabular-nums">{index + 1}</td>
+      <td className="px-2 py-1.5 font-medium text-neutral-900">
         <TextCell
           initial={row.contractorName}
           save={(v) =>
@@ -36,7 +36,7 @@ export function OutsourcingRow({
           ariaLabel="外注先"
         />
       </td>
-      <td className="px-2 py-2 text-right tabular-nums">
+      <td className="px-2 py-1.5 text-right tabular-nums">
         <NumberCell
           initial={row.amountInclTax}
           save={(v) =>
@@ -48,7 +48,7 @@ export function OutsourcingRow({
           ariaLabel="税込金額"
         />
       </td>
-      <td className="px-2 py-2 text-neutral-600">
+      <td className="px-2 py-1.5 text-neutral-600">
         <TextCell
           initial={row.memo ?? ""}
           save={(v) =>
@@ -60,12 +60,12 @@ export function OutsourcingRow({
           ariaLabel="メモ"
         />
       </td>
-      <td className="px-2 py-3 text-right">
+      <td className="px-2 py-2 text-right">
         <button
           type="button"
           onClick={remove}
           disabled={pending}
-          className="text-sm text-rose-600 hover:underline whitespace-nowrap"
+          className="text-[13px] text-rose-600 hover:underline whitespace-nowrap"
         >
           削除
         </button>

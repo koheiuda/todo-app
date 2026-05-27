@@ -81,22 +81,22 @@ function InvoiceFirstRow({
     <tr className="border-t-2 border-neutral-300">
       <td
         rowSpan={spanCount}
-        className="px-2 py-3 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
+        className="px-2 py-2 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
       >
         {index + 1}
       </td>
       <td
         rowSpan={spanCount}
-        className="px-3 py-3 font-medium text-neutral-900 align-top border-r border-neutral-200 min-w-[200px]"
+        className="px-3 py-2 font-medium text-neutral-900 align-top border-r border-neutral-200 whitespace-nowrap"
       >
         {invoice.client?.name ?? "—"}
       </td>
       <td
         rowSpan={spanCount}
-        className="px-1 py-2 text-right tabular-nums align-top border-r border-neutral-200 w-32"
+        className="px-1 py-1.5 text-right tabular-nums align-top border-r border-neutral-200"
       >
         {amountsLocked ? (
-          <div className="px-2 py-1.5 text-right text-neutral-500" title="明細から自動計算">
+          <div className="px-2 py-1 text-right text-neutral-500 whitespace-nowrap" title="明細から自動計算">
             {formatYen(invoice.amountInclTax)}
           </div>
         ) : (
@@ -114,10 +114,10 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-1 py-2 text-right tabular-nums text-neutral-600 align-top border-r border-neutral-200 w-32"
+        className="px-1 py-1.5 text-right tabular-nums text-neutral-600 align-top border-r border-neutral-200"
       >
         {amountsLocked ? (
-          <div className="px-2 py-1.5 text-right text-neutral-500" title="明細から自動計算">
+          <div className="px-2 py-1 text-right text-neutral-500 whitespace-nowrap" title="明細から自動計算">
             {formatYen(invoice.amountExclTax)}
           </div>
         ) : (
@@ -135,33 +135,33 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-44"
+        className="px-2 py-2 text-center align-top border-r border-neutral-200"
       >
         <IssuePdfButton invoice={invoice} />
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-16"
+        className="px-2 py-2 text-center align-top border-r border-neutral-200"
       >
         <input
           type="checkbox"
           checked={!!invoice.sentAt}
           onChange={toggleSent}
           disabled={pending}
-          className="size-5 accent-neutral-900 cursor-pointer"
+          className="size-4 accent-neutral-900 cursor-pointer"
           aria-label="請求書送付"
         />
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-16"
+        className="px-2 py-2 text-center align-top border-r border-neutral-200"
       >
         <input
           type="checkbox"
           checked={!!invoice.paidAt}
           onChange={togglePaid}
           disabled={pending}
-          className="size-5 accent-emerald-600 cursor-pointer"
+          className="size-4 accent-emerald-600 cursor-pointer"
           aria-label="振込確認"
         />
       </td>
@@ -170,16 +170,16 @@ function InvoiceFirstRow({
         <LineItemCells item={firstItem} />
       ) : (
         <>
-          <td className="px-2 py-3 text-neutral-300 text-sm italic">明細なし</td>
-          <td className="px-2 py-3" />
-          <td className="px-2 py-3" />
-          <td className="px-2 py-3" />
+          <td className="px-2 py-2 text-neutral-300 text-[13px] italic">明細なし</td>
+          <td className="px-2 py-2" />
+          <td className="px-2 py-2" />
+          <td className="px-2 py-2" />
         </>
       )}
 
       <td
         rowSpan={spanCount}
-        className="px-1 py-2 text-sm text-neutral-600 align-top border-l border-neutral-200 w-56"
+        className="px-1 py-1.5 text-[13px] text-neutral-600 align-top border-l border-neutral-200"
       >
         <TextareaCell
           initial={invoice.memo ?? ""}
@@ -194,13 +194,13 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-3 text-right align-top border-l border-neutral-200 w-20"
+        className="px-2 py-2 text-right align-top border-l border-neutral-200"
       >
         <button
           type="button"
           onClick={removeInvoice}
           disabled={pending}
-          className="text-sm text-rose-600 hover:underline whitespace-nowrap"
+          className="text-[13px] text-rose-600 hover:underline whitespace-nowrap"
         >
           削除
         </button>
@@ -228,7 +228,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
 
   return (
     <>
-      <td className="px-1 py-1 text-sm text-neutral-700 min-w-[180px]">
+      <td className="px-1 py-0.5 text-[13px] text-neutral-700">
         <TextCell
           initial={item.description}
           save={(v) =>
@@ -238,9 +238,10 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           }
           placeholder="項目名"
           ariaLabel="項目名"
+          className="whitespace-nowrap"
         />
       </td>
-      <td className="px-1 py-1 text-right tabular-nums w-28">
+      <td className="px-1 py-0.5 text-right tabular-nums">
         <NumberCell
           initial={item.unitPrice}
           save={(v) =>
@@ -252,7 +253,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           ariaLabel="単価"
         />
       </td>
-      <td className="px-1 py-1 text-right tabular-nums w-20">
+      <td className="px-1 py-0.5 text-right tabular-nums">
         <NumberCell
           initial={Number(item.quantity)}
           save={(v) =>
@@ -265,7 +266,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           allowDecimal
         />
       </td>
-      <td className="px-1 py-1 text-right tabular-nums w-28 group">
+      <td className="px-1 py-0.5 text-right tabular-nums group">
         <div className="flex items-center justify-end gap-1">
           <div className="flex-1">
             <NumberCell
@@ -285,7 +286,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
             disabled={pending}
             aria-label="明細削除"
             title="明細削除"
-            className="text-neutral-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity text-base"
+            className="text-neutral-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity text-[15px]"
           >
             ×
           </button>
@@ -319,20 +320,20 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
 
   return (
     <tr className="border-t border-neutral-100 bg-neutral-50/50">
-      <td className="px-1 py-1 min-w-[180px]">
+      <td className="px-1 py-0.5">
         <input
           type="text"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           placeholder="＋ 項目を追加"
           aria-label="項目名"
-          className="text-sm px-2 py-1.5 border border-transparent rounded w-full bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
+          className="text-[13px] px-2 py-1 border border-transparent rounded w-full bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
           }}
         />
       </td>
-      <td className="px-1 py-1 w-28">
+      <td className="px-1 py-0.5">
         <input
           type="text"
           inputMode="numeric"
@@ -340,13 +341,13 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
           onChange={(e) => setUnit(e.target.value.replace(/[^\d]/g, ""))}
           aria-label="単価"
           placeholder="単価"
-          className="text-sm px-2 py-1.5 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
+          className="text-[13px] px-2 py-1 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
           }}
         />
       </td>
-      <td className="px-1 py-1 w-20">
+      <td className="px-1 py-0.5">
         <input
           type="text"
           inputMode="decimal"
@@ -354,22 +355,22 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
           onChange={(e) => setQty(e.target.value.replace(/[^\d.]/g, ""))}
           aria-label="個数"
           placeholder="個"
-          className="text-sm px-2 py-1.5 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
+          className="text-[13px] px-2 py-1 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
           }}
         />
       </td>
-      <td className="px-1 py-1 w-28">
+      <td className="px-1 py-0.5">
         <div className="flex items-center justify-end gap-1">
-          <span className="text-sm text-neutral-400 tabular-nums px-2">
+          <span className="text-[13px] text-neutral-400 tabular-nums px-2">
             {subtotal > 0 ? subtotal.toLocaleString("ja-JP") : ""}
           </span>
           <button
             type="button"
             onClick={submit}
             disabled={pending || !desc.trim()}
-            className="text-base text-blue-700 hover:text-blue-900 disabled:text-neutral-300"
+            className="text-[15px] text-blue-700 hover:text-blue-900 disabled:text-neutral-300"
             aria-label="保存"
             title="Enter で保存"
           >

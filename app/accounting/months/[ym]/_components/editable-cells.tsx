@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const baseCls =
-  "px-2 py-1.5 rounded border border-transparent bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none w-full transition-colors";
+  "px-2 py-1 rounded border border-transparent bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none w-full transition-colors";
 
 export function TextCell({
   initial,
@@ -44,7 +44,7 @@ export function TextCell({
       }}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      className={`${baseCls} text-sm ${className}`}
+      className={`${baseCls} text-[13px] ${className}`}
     />
   );
 }
@@ -106,7 +106,7 @@ export function NumberCell({
       }}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      className={`${baseCls} text-right tabular-nums text-sm ${className}`}
+      className={`${baseCls} text-right tabular-nums text-[13px] ${className}`}
     />
   );
 }
@@ -161,7 +161,7 @@ export function TextareaCell({
       rows={1}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      className={`${baseCls} text-sm resize-none font-sans whitespace-pre-line block ${className}`}
+      className={`${baseCls} text-[13px] resize-none font-sans whitespace-pre-line block ${className}`}
     />
   );
 }
