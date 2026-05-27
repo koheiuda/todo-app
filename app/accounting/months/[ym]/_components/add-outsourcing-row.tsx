@@ -30,7 +30,7 @@ export function AddOutsourcingRow({ yearMonth }: { yearMonth: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs px-3 py-1.5 rounded bg-neutral-900 text-white hover:bg-neutral-800"
+        className="text-sm px-4 py-2 rounded bg-neutral-900 text-white hover:bg-neutral-800"
       >
         ＋ 外注費を追加
       </button>
@@ -44,27 +44,27 @@ export function AddOutsourcingRow({ yearMonth }: { yearMonth: string }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="外注先名"
-        className="text-xs px-2 py-1.5 border border-neutral-300 rounded w-48"
+        className="text-sm px-2 py-2 border border-neutral-300 rounded w-56"
       />
       <input
         type="number"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         placeholder="税込金額"
-        className="text-xs px-2 py-1.5 border border-neutral-300 rounded w-32 tabular-nums"
+        className="text-sm px-2 py-2 border border-neutral-300 rounded w-36 tabular-nums text-right"
       />
       <input
         type="text"
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
         placeholder="メモ"
-        className="text-xs px-2 py-1.5 border border-neutral-300 rounded w-48"
+        className="text-sm px-2 py-2 border border-neutral-300 rounded w-56"
       />
       <button
         type="button"
         onClick={submit}
         disabled={pending || !name || !amount}
-        className="text-xs px-3 py-1.5 rounded bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-300"
+        className="text-sm px-4 py-2 rounded bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-300"
       >
         {pending ? "..." : "保存"}
       </button>
@@ -72,7 +72,7 @@ export function AddOutsourcingRow({ yearMonth }: { yearMonth: string }) {
         type="button"
         onClick={() => setOpen(false)}
         disabled={pending}
-        className="text-xs px-2 py-1.5 text-neutral-600 hover:text-neutral-900"
+        className="text-sm px-2 py-2 text-neutral-600 hover:text-neutral-900"
       >
         キャンセル
       </button>

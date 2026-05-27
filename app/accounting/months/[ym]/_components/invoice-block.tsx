@@ -106,26 +106,26 @@ function InvoiceFirstRow({
     <tr className="border-t-2 border-neutral-300">
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
+        className="px-2 py-3 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
       >
         {index + 1}
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 font-medium text-neutral-900 align-top border-r border-neutral-200 min-w-[180px]"
+        className="px-3 py-3 font-medium text-neutral-900 align-top border-r border-neutral-200 min-w-[200px]"
       >
         {invoice.client?.name ?? "—"}
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-right tabular-nums align-top border-r border-neutral-200 w-24"
+        className="px-2 py-3 text-right tabular-nums align-top border-r border-neutral-200 w-32"
       >
         {editingIncl && !amountsLocked ? (
           <input
             type="number"
             value={incl}
             onChange={(e) => setIncl(e.target.value)}
-            className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums"
+            className="text-base px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
             autoFocus
             aria-label="税込金額"
             placeholder="税込"
@@ -141,7 +141,7 @@ function InvoiceFirstRow({
             onClick={() => !amountsLocked && setEditingIncl(true)}
             disabled={amountsLocked}
             title={amountsLocked ? "明細から自動計算" : "クリックで編集"}
-            className={`px-2 py-0.5 rounded w-full text-right ${
+            className={`px-2 py-1.5 rounded w-full text-right text-base ${
               amountsLocked
                 ? "text-neutral-500 cursor-not-allowed"
                 : "hover:bg-neutral-100"
@@ -153,14 +153,14 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-right tabular-nums text-neutral-600 align-top border-r border-neutral-200 w-24"
+        className="px-2 py-3 text-right tabular-nums text-neutral-600 align-top border-r border-neutral-200 w-32"
       >
         {editingExcl && !amountsLocked ? (
           <input
             type="number"
             value={excl}
             onChange={(e) => setExcl(e.target.value)}
-            className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums"
+            className="text-base px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
             autoFocus
             aria-label="金額（税抜）"
             placeholder="税抜"
@@ -176,7 +176,7 @@ function InvoiceFirstRow({
             onClick={() => !amountsLocked && setEditingExcl(true)}
             disabled={amountsLocked}
             title={amountsLocked ? "明細から自動計算" : "クリックで編集"}
-            className={`px-2 py-0.5 rounded w-full text-right ${
+            className={`px-2 py-1.5 rounded w-full text-right text-base ${
               amountsLocked
                 ? "text-neutral-500 cursor-not-allowed"
                 : "hover:bg-neutral-100"
@@ -188,33 +188,33 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-center align-top border-r border-neutral-200 w-32"
+        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-44"
       >
         <IssuePdfButton invoice={invoice} />
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-center align-top border-r border-neutral-200 w-14"
+        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-16"
       >
         <input
           type="checkbox"
           checked={!!invoice.sentAt}
           onChange={toggleSent}
           disabled={pending}
-          className="size-4 accent-neutral-900 cursor-pointer"
+          className="size-5 accent-neutral-900 cursor-pointer"
           aria-label="請求書送付"
         />
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-center align-top border-r border-neutral-200 w-14"
+        className="px-2 py-3 text-center align-top border-r border-neutral-200 w-16"
       >
         <input
           type="checkbox"
           checked={!!invoice.paidAt}
           onChange={togglePaid}
           disabled={pending}
-          className="size-4 accent-emerald-600 cursor-pointer"
+          className="size-5 accent-emerald-600 cursor-pointer"
           aria-label="振込確認"
         />
       </td>
@@ -223,22 +223,22 @@ function InvoiceFirstRow({
         <LineItemCells item={firstItem} />
       ) : (
         <>
-          <td className="px-2 py-2 text-neutral-300 text-xs italic">明細なし</td>
-          <td className="px-2 py-2" />
-          <td className="px-2 py-2" />
-          <td className="px-2 py-2" />
+          <td className="px-2 py-3 text-neutral-300 text-sm italic">明細なし</td>
+          <td className="px-2 py-3" />
+          <td className="px-2 py-3" />
+          <td className="px-2 py-3" />
         </>
       )}
 
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-xs text-neutral-600 align-top border-l border-neutral-200 w-48"
+        className="px-2 py-3 text-sm text-neutral-600 align-top border-l border-neutral-200 w-56"
       >
         {editingMemo ? (
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            className="text-xs px-1.5 py-0.5 border border-neutral-300 rounded w-full font-sans"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full font-sans"
             rows={Math.max(2, memo.split("\n").length)}
             autoFocus
             aria-label="メモ"
@@ -253,7 +253,7 @@ function InvoiceFirstRow({
           <button
             type="button"
             onClick={() => setEditingMemo(true)}
-            className="text-left hover:bg-neutral-100 px-2 py-0.5 rounded w-full min-h-[1.5rem] whitespace-pre-line block"
+            className="text-left hover:bg-neutral-100 px-2 py-1.5 rounded w-full min-h-[2rem] whitespace-pre-line block"
           >
             {invoice.memo ?? "—"}
           </button>
@@ -261,15 +261,15 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-right align-top border-l border-neutral-200 w-16"
+        className="px-2 py-3 text-right align-top border-l border-neutral-200 w-20"
       >
         <button
           type="button"
           onClick={removeInvoice}
           disabled={pending}
-          className="text-xs text-rose-600 hover:underline"
+          className="text-sm text-rose-600 hover:underline whitespace-nowrap"
         >
-          請求削除
+          削除
         </button>
       </td>
     </tr>
@@ -327,13 +327,13 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
 
   return (
     <>
-      <td className="px-2 py-1 text-sm text-neutral-700">
+      <td className="px-2 py-2 text-sm text-neutral-700 min-w-[180px]">
         {editingDesc ? (
           <input
             type="text"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full"
             aria-label="項目名"
             placeholder="項目名"
             autoFocus
@@ -347,19 +347,19 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           <button
             type="button"
             onClick={() => setEditingDesc(true)}
-            className="text-left hover:bg-neutral-100 px-2 py-0.5 rounded w-full"
+            className="text-left hover:bg-neutral-100 px-2 py-1.5 rounded w-full"
           >
             {item.description}
           </button>
         )}
       </td>
-      <td className="px-2 py-1 text-right tabular-nums w-24">
+      <td className="px-2 py-2 text-right tabular-nums w-28">
         {editingUnit ? (
           <input
             type="number"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
-            className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
             aria-label="単価"
             placeholder="単価"
             autoFocus
@@ -373,20 +373,20 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           <button
             type="button"
             onClick={() => setEditingUnit(true)}
-            className="px-2 py-0.5 rounded w-full text-right hover:bg-neutral-100"
+            className="px-2 py-1.5 rounded w-full text-right hover:bg-neutral-100 text-sm"
           >
             {item.unitPrice.toLocaleString("ja-JP")}
           </button>
         )}
       </td>
-      <td className="px-2 py-1 text-right tabular-nums w-16">
+      <td className="px-2 py-2 text-right tabular-nums w-20">
         {editingQty ? (
           <input
             type="number"
             step="0.01"
             value={qty}
             onChange={(e) => setQty(e.target.value)}
-            className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
             aria-label="個数"
             placeholder="個数"
             autoFocus
@@ -400,7 +400,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           <button
             type="button"
             onClick={() => setEditingQty(true)}
-            className="px-2 py-0.5 rounded w-full text-right hover:bg-neutral-100"
+            className="px-2 py-1.5 rounded w-full text-right hover:bg-neutral-100 text-sm"
           >
             {Number(item.quantity).toLocaleString("ja-JP", {
               maximumFractionDigits: 2,
@@ -408,14 +408,14 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           </button>
         )}
       </td>
-      <td className="px-2 py-1 text-right tabular-nums w-24 group">
+      <td className="px-2 py-2 text-right tabular-nums w-28 group">
         <div className="flex items-center justify-end gap-1">
           {editingSub ? (
             <input
               type="number"
               value={sub}
               onChange={(e) => setSub(e.target.value)}
-              className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums"
+              className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
               aria-label="合計"
               placeholder="合計"
               autoFocus
@@ -429,7 +429,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
             <button
               type="button"
               onClick={() => setEditingSub(true)}
-              className="px-2 py-0.5 rounded text-right hover:bg-neutral-100 flex-1"
+              className="px-2 py-1.5 rounded text-right hover:bg-neutral-100 flex-1 text-sm"
             >
               {item.subtotal.toLocaleString("ja-JP")}
             </button>
@@ -440,7 +440,7 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
             disabled={pending}
             aria-label="明細削除"
             title="明細削除"
-            className="text-neutral-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="text-neutral-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity text-base"
           >
             ×
           </button>
@@ -477,12 +477,12 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
       <tr className="border-t border-neutral-100">
         <td
           colSpan={4}
-          className="px-2 py-1 bg-neutral-50/50"
+          className="px-2 py-1.5 bg-neutral-50/50"
         >
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="text-[11px] text-neutral-400 hover:text-neutral-700"
+            className="text-sm text-neutral-500 hover:text-neutral-900"
           >
             ＋ 項目を追加
           </button>
@@ -496,7 +496,7 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
 
   return (
     <tr className="border-t border-neutral-100 bg-neutral-50">
-      <td className="px-2 py-1">
+      <td className="px-2 py-2 min-w-[180px]">
         <input
           type="text"
           value={desc}
@@ -504,28 +504,28 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
           placeholder="項目"
           aria-label="項目名"
           autoFocus
-          className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full bg-white"
+          className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full bg-white"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
             if (e.key === "Escape") setOpen(false);
           }}
         />
       </td>
-      <td className="px-2 py-1 w-24">
+      <td className="px-2 py-2 w-28">
         <input
           type="number"
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
           aria-label="単価"
           placeholder="単価"
-          className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums bg-white"
+          className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums bg-white"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
             if (e.key === "Escape") setOpen(false);
           }}
         />
       </td>
-      <td className="px-2 py-1 w-16">
+      <td className="px-2 py-2 w-20">
         <input
           type="number"
           step="0.01"
@@ -533,23 +533,23 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
           onChange={(e) => setQty(e.target.value)}
           aria-label="個数"
           placeholder="1"
-          className="text-sm px-1.5 py-0.5 border border-neutral-300 rounded w-full text-right tabular-nums bg-white"
+          className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums bg-white"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
             if (e.key === "Escape") setOpen(false);
           }}
         />
       </td>
-      <td className="px-2 py-1 w-24">
+      <td className="px-2 py-2 w-28">
         <div className="flex items-center justify-end gap-1">
-          <span className="text-xs text-neutral-500 tabular-nums">
+          <span className="text-sm text-neutral-500 tabular-nums">
             {subtotal.toLocaleString("ja-JP")}
           </span>
           <button
             type="button"
             onClick={submit}
             disabled={pending || !desc.trim()}
-            className="text-sm text-blue-700 hover:text-blue-900 disabled:text-neutral-300"
+            className="text-base text-blue-700 hover:text-blue-900 disabled:text-neutral-300"
             aria-label="保存"
             title="保存"
           >

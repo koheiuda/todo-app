@@ -48,14 +48,14 @@ export function OutsourcingRow({
 
   return (
     <tr className="border-b border-neutral-100 last:border-b-0 hover:bg-neutral-50">
-      <td className="px-3 py-2 text-neutral-500 tabular-nums">{index + 1}</td>
-      <td className="px-3 py-2 font-medium text-neutral-900">
+      <td className="px-2 py-3 text-center text-neutral-500 tabular-nums">{index + 1}</td>
+      <td className="px-3 py-3 font-medium text-neutral-900">
         {editingName ? (
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="text-sm px-2 py-0.5 border border-neutral-300 rounded w-full"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full"
             autoFocus
             onBlur={saveName}
             onKeyDown={(e) => {
@@ -67,19 +67,19 @@ export function OutsourcingRow({
           <button
             type="button"
             onClick={() => setEditingName(true)}
-            className="hover:bg-neutral-100 px-2 py-0.5 rounded w-full text-left"
+            className="hover:bg-neutral-100 px-2 py-1.5 rounded w-full text-left text-sm"
           >
             {row.contractorName}
           </button>
         )}
       </td>
-      <td className="px-3 py-2 text-right tabular-nums">
+      <td className="px-2 py-3 text-right tabular-nums">
         {editingAmount ? (
           <input
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="text-xs px-1.5 py-0.5 border border-neutral-300 rounded w-28 text-right tabular-nums"
+            className="text-base px-2 py-1.5 border border-neutral-300 rounded w-full text-right tabular-nums"
             autoFocus
             onBlur={saveAmount}
             onKeyDown={(e) => {
@@ -91,19 +91,19 @@ export function OutsourcingRow({
           <button
             type="button"
             onClick={() => setEditingAmount(true)}
-            className="hover:bg-neutral-100 px-2 py-0.5 rounded"
+            className="hover:bg-neutral-100 px-2 py-1.5 rounded w-full text-right text-base"
           >
             {formatYen(row.amountInclTax)}
           </button>
         )}
       </td>
-      <td className="px-3 py-2 text-neutral-600 text-xs">
+      <td className="px-2 py-3 text-neutral-600">
         {editingMemo ? (
           <input
             type="text"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            className="text-xs px-1.5 py-0.5 border border-neutral-300 rounded w-full"
+            className="text-sm px-2 py-1.5 border border-neutral-300 rounded w-full"
             autoFocus
             onBlur={saveMemo}
             onKeyDown={(e) => {
@@ -115,18 +115,18 @@ export function OutsourcingRow({
           <button
             type="button"
             onClick={() => setEditingMemo(true)}
-            className="text-left hover:bg-neutral-100 px-2 py-0.5 rounded w-full min-h-[1.5rem]"
+            className="text-left hover:bg-neutral-100 px-2 py-1.5 rounded w-full min-h-[2rem] text-sm"
           >
             {row.memo ?? "—"}
           </button>
         )}
       </td>
-      <td className="px-3 py-2 text-right">
+      <td className="px-2 py-3 text-right">
         <button
           type="button"
           onClick={remove}
           disabled={pending}
-          className="text-xs text-rose-600 hover:underline"
+          className="text-sm text-rose-600 hover:underline whitespace-nowrap"
         >
           削除
         </button>

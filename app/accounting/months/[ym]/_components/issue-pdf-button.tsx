@@ -28,12 +28,12 @@ export function IssuePdfButton({ invoice }: { invoice: InvoiceWithClient }) {
 
   if (invoice.pdfUrl) {
     return (
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-2 whitespace-nowrap">
         <a
           href={`/api/accounting/invoices/${invoice.id}/pdf`}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-blue-700 hover:underline"
+          className="text-sm text-blue-700 hover:underline"
         >
           ダウンロード
         </a>
@@ -41,7 +41,7 @@ export function IssuePdfButton({ invoice }: { invoice: InvoiceWithClient }) {
           type="button"
           onClick={issue}
           disabled={pending}
-          className="text-xs text-neutral-500 hover:underline"
+          className="text-sm text-neutral-500 hover:underline"
           title="PDFを再生成します"
         >
           再発行
@@ -56,12 +56,12 @@ export function IssuePdfButton({ invoice }: { invoice: InvoiceWithClient }) {
         type="button"
         onClick={issue}
         disabled={pending}
-        className="text-xs px-2 py-1 rounded bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-300"
+        className="text-sm px-3 py-1.5 rounded bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-300 whitespace-nowrap"
       >
         {pending ? "発行中..." : "発行"}
       </button>
       {error ? (
-        <p className="text-xs text-rose-700 mt-1">{error}</p>
+        <p className="text-sm text-rose-700 mt-1">{error}</p>
       ) : null}
     </div>
   );

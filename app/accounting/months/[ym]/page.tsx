@@ -100,43 +100,43 @@ export default async function MonthDetailPage({
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 border-b border-neutral-200">
               <tr>
-                <th className="text-center px-2 py-2 font-medium text-neutral-600 w-10 border-r border-neutral-200">
+                <th className="text-center px-2 py-3 font-medium text-neutral-600 w-12 border-r border-neutral-200 whitespace-nowrap">
                   No
                 </th>
-                <th className="text-left px-2 py-2 font-medium text-neutral-600 border-r border-neutral-200 min-w-[180px]">
+                <th className="text-left px-3 py-3 font-medium text-neutral-600 border-r border-neutral-200 min-w-[200px] whitespace-nowrap">
                   請求先
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-24 border-r border-neutral-200">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-32 border-r border-neutral-200 whitespace-nowrap">
                   税込
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-24 border-r border-neutral-200">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-32 border-r border-neutral-200 whitespace-nowrap">
                   金額
                 </th>
-                <th className="text-center px-2 py-2 font-medium text-neutral-600 w-32 border-r border-neutral-200">
+                <th className="text-center px-2 py-3 font-medium text-neutral-600 w-44 border-r border-neutral-200 whitespace-nowrap">
                   PDF
                 </th>
-                <th className="text-center px-2 py-2 font-medium text-neutral-600 w-14 border-r border-neutral-200">
+                <th className="text-center px-2 py-3 font-medium text-neutral-600 w-16 border-r border-neutral-200 whitespace-nowrap">
                   送付
                 </th>
-                <th className="text-center px-2 py-2 font-medium text-neutral-600 w-14 border-r border-neutral-200">
+                <th className="text-center px-2 py-3 font-medium text-neutral-600 w-16 border-r border-neutral-200 whitespace-nowrap">
                   振込
                 </th>
-                <th className="text-left px-2 py-2 font-medium text-neutral-600">
+                <th className="text-left px-2 py-3 font-medium text-neutral-600 min-w-[180px] whitespace-nowrap">
                   項目
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-24">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-28 whitespace-nowrap">
                   単価
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-16">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-20 whitespace-nowrap">
                   個数
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-24">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-28 whitespace-nowrap">
                   合計
                 </th>
-                <th className="text-left px-2 py-2 font-medium text-neutral-600 w-48 border-l border-neutral-200">
+                <th className="text-left px-2 py-3 font-medium text-neutral-600 w-56 border-l border-neutral-200 whitespace-nowrap">
                   メモ
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-16 border-l border-neutral-200">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-20 border-l border-neutral-200 whitespace-nowrap">
                   操作
                 </th>
               </tr>
@@ -165,13 +165,13 @@ export default async function MonthDetailPage({
             {invoices.length > 0 ? (
               <tfoot className="bg-neutral-50 border-t-2 border-neutral-200">
                 <tr className="font-semibold">
-                  <td className="px-2 py-2 text-right" colSpan={2}>
+                  <td className="px-3 py-3 text-right text-base" colSpan={2}>
                     合計金額
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums border-r border-neutral-200">
+                  <td className="px-2 py-3 text-right tabular-nums border-r border-neutral-200 text-base">
                     {formatYen(revenueInclTotal)}
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums text-neutral-600 border-r border-neutral-200">
+                  <td className="px-2 py-3 text-right tabular-nums text-neutral-600 border-r border-neutral-200 text-base">
                     {formatYen(revenueExclTotal)}
                   </td>
                   <td colSpan={9} />
@@ -187,23 +187,23 @@ export default async function MonthDetailPage({
           <h2 className="text-sm font-semibold text-neutral-700">外注費</h2>
           <AddOutsourcingRow yearMonth={ym} />
         </div>
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden max-w-3xl">
+        <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto max-w-3xl">
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 border-b border-neutral-200">
               <tr>
-                <th className="text-center px-2 py-2 font-medium text-neutral-600 w-10">
+                <th className="text-center px-2 py-3 font-medium text-neutral-600 w-12 whitespace-nowrap">
                   No
                 </th>
-                <th className="text-left px-2 py-2 font-medium text-neutral-600">
+                <th className="text-left px-3 py-3 font-medium text-neutral-600 min-w-[200px] whitespace-nowrap">
                   外注費
                 </th>
-                <th className="text-right px-2 py-2 font-medium text-neutral-600 w-32">
+                <th className="text-right px-2 py-3 font-medium text-neutral-600 w-32 whitespace-nowrap">
                   税込
                 </th>
-                <th className="text-left px-2 py-2 font-medium text-neutral-600">
+                <th className="text-left px-2 py-3 font-medium text-neutral-600 min-w-[180px] whitespace-nowrap">
                   メモ
                 </th>
-                <th className="text-right px-2 py-2 w-14" aria-label="操作" />
+                <th className="text-right px-2 py-3 w-20" aria-label="操作" />
               </tr>
             </thead>
             <tbody>
@@ -225,10 +225,10 @@ export default async function MonthDetailPage({
             {outsourcing.length > 0 ? (
               <tfoot className="bg-neutral-50 border-t-2 border-neutral-200">
                 <tr className="font-semibold">
-                  <td className="px-2 py-2 text-right" colSpan={2}>
+                  <td className="px-3 py-3 text-right text-base" colSpan={2}>
                     合計金額
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums">
+                  <td className="px-2 py-3 text-right tabular-nums text-base">
                     {formatYen(outsourcingTotal)}
                   </td>
                   <td colSpan={2} />
