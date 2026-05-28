@@ -215,6 +215,7 @@ const LineItemAddSchema = z.object({
   description: z.string().trim().min(1, "項目を入力してください"),
   unitPrice: z.number().int().min(0).default(0),
   quantity: z.number().min(0).default(1),
+  unit: z.string().trim().max(16).optional().nullable(),
 });
 
 export async function addLineItem(invoiceId: string, input: unknown) {
@@ -236,6 +237,7 @@ export async function addLineItem(invoiceId: string, input: unknown) {
     deliveryDate: `${inv[0].yearMonth}-30`,
     unitPrice: data.unitPrice,
     quantity: data.quantity.toString(),
+    unit: data.unit ?? null,
     subtotal,
     sortOrder: Number(lastSort[0]?.max ?? 0) + 1,
   });
@@ -245,7 +247,7 @@ export async function addLineItem(invoiceId: string, input: unknown) {
 
 export async function updateLineItem(
   itemId: string,
-  field: "description" | "unitPrice" | "quantity" | "subtotal",
+  field: "description" | "unitPrice" | "quantity" | "subtotal" | "unit",
   value: string | number,
 ) {
   const row = await getDb()
@@ -257,6 +259,9 @@ export async function updateLineItem(
   const patch: Record<string, unknown> = {};
   if (field === "description") {
     patch.description = String(value);
+  } else if (field === "unit") {
+    const v = String(value).trim();
+    patch.unit = v === "" ? null : v.slice(0, 16);
   } else if (field === "unitPrice") {
     const u = Number(value);
     const q = Number(row[0].quantity);

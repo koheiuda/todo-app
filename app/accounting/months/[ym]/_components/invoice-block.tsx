@@ -174,6 +174,7 @@ function InvoiceFirstRow({
           <td className="px-2 py-2" />
           <td className="px-2 py-2" />
           <td className="px-2 py-2" />
+          <td className="px-2 py-2" />
         </>
       )}
 
@@ -266,6 +267,18 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
           allowDecimal
         />
       </td>
+      <td className="px-1 py-0.5 text-[13px] text-neutral-600">
+        <TextCell
+          initial={item.unit ?? ""}
+          save={(v) =>
+            start(async () => {
+              await updateLineItem(item.id, "unit", v);
+            })
+          }
+          placeholder="単位"
+          ariaLabel="単位"
+        />
+      </td>
       <td className="px-1 py-0.5 text-right tabular-nums group">
         <div className="flex items-center justify-end gap-1">
           <div className="flex-1">
@@ -298,8 +311,9 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
 
 function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
   const [desc, setDesc] = useState("");
-  const [unit, setUnit] = useState("");
+  const [unitPrice, setUnitPrice] = useState("");
   const [qty, setQty] = useState("1");
+  const [unit, setUnit] = useState("");
   const [pending, start] = useTransition();
 
   function submit() {
@@ -307,16 +321,18 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
     start(async () => {
       await addLineItem(invoiceId, {
         description: desc.trim(),
-        unitPrice: parseInt(unit, 10) || 0,
+        unitPrice: parseInt(unitPrice, 10) || 0,
         quantity: parseFloat(qty) || 1,
+        unit: unit.trim() || null,
       });
       setDesc("");
-      setUnit("");
+      setUnitPrice("");
       setQty("1");
+      setUnit("");
     });
   }
 
-  const subtotal = (parseInt(unit, 10) || 0) * (parseFloat(qty) || 0);
+  const subtotal = (parseInt(unitPrice, 10) || 0) * (parseFloat(qty) || 0);
 
   return (
     <tr className="border-t border-neutral-100 bg-neutral-50/50">
@@ -337,8 +353,8 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
         <input
           type="text"
           inputMode="numeric"
-          value={unit}
-          onChange={(e) => setUnit(e.target.value.replace(/[^\d]/g, ""))}
+          value={unitPrice}
+          onChange={(e) => setUnitPrice(e.target.value.replace(/[^\d]/g, ""))}
           aria-label="単価"
           placeholder="単価"
           className="text-[13px] px-2 py-1 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
@@ -356,6 +372,19 @@ function AddLineItemRow({ invoiceId }: { invoiceId: string }) {
           aria-label="個数"
           placeholder="個"
           className="text-[13px] px-2 py-1 border border-transparent rounded w-full text-right tabular-nums bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submit();
+          }}
+        />
+      </td>
+      <td className="px-1 py-0.5">
+        <input
+          type="text"
+          value={unit}
+          onChange={(e) => setUnit(e.target.value)}
+          aria-label="単位"
+          placeholder="単位"
+          className="text-[13px] px-2 py-1 border border-transparent rounded w-full bg-transparent hover:border-neutral-200 focus:border-neutral-400 focus:bg-white focus:outline-none transition-colors"
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
           }}

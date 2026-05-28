@@ -130,6 +130,9 @@ export default async function MonthDetailPage({
                 <th className="text-right px-2 py-2 font-medium text-neutral-600 min-w-[60px] whitespace-nowrap">
                   個
                 </th>
+                <th className="text-left px-2 py-2 font-medium text-neutral-600 min-w-[60px] whitespace-nowrap">
+                  単位
+                </th>
                 <th className="text-right px-2 py-2 font-medium text-neutral-600 min-w-[110px] whitespace-nowrap">
                   合計
                 </th>
@@ -145,7 +148,7 @@ export default async function MonthDetailPage({
               {invoices.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={13}
+                    colSpan={14}
                     className="px-3 py-8 text-center text-neutral-400"
                   >
                     請求先がありません
@@ -174,7 +177,7 @@ export default async function MonthDetailPage({
                   <td className="px-2 py-2 text-right tabular-nums text-neutral-600 border-r border-neutral-200 text-[15px]">
                     {formatYen(revenueExclTotal)}
                   </td>
-                  <td colSpan={9} />
+                  <td colSpan={10} />
                 </tr>
               </tfoot>
             ) : null}

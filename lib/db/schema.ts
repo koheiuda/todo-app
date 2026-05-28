@@ -218,6 +218,7 @@ export const invoiceLineItems = pgTable("invoice_line_items", {
   quantity: decimal("quantity", { precision: 10, scale: 2 })
     .notNull()
     .default("1"),
+  unit: varchar("unit", { length: 16 }),
   subtotal: integer("subtotal").notNull().default(0),
   sortOrder: integer("sort_order").notNull().default(0),
 });
