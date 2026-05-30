@@ -9,7 +9,129 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { nextInvoiceNumber } from "@/lib/accounting/queries";
+import {
+  listInvoicesByMonth,
+  listLineItemsByInvoiceIds,
+  listOutsourcingByMonth,
+  nextInvoiceNumber,
+} from "@/lib/accounting/queries";
+
+function shiftYearMonth(ym: string, delta: number): string {
+  const [y, m] = ym.split("-").map((s) => parseInt(s, 10));
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function dueDateFor(yearMonth: string): string {
+  const due = new Date(`${yearMonth}-01`);
+  due.setMonth(due.getMonth() + 2);
+  due.setDate(0);
+  return due.toISOString().slice(0, 10);
+}
+
+export type CopyPrevMonthResult =
+  | { ok: true; invoices: number; outsourcing: number; fromYm: string }
+  | { ok: false; reason: "target-not-empty" | "source-empty" };
+
+/**
+ * 前月の請求先（明細含む）・外注費を当月へ丸ごとコピーする。
+ * 見込みの叩き台用。当月が完全に空のときだけ実行（誤コピー防止）。
+ * 送付/振込フラグ・PDF・明細の納品日はリセット、金額・明細はそのままコピー。
+ */
+export async function copyFromPreviousMonth(
+  yearMonth: string,
+): Promise<CopyPrevMonthResult> {
+  const fromYm = shiftYearMonth(yearMonth, -1);
+
+  const [curInvoices, curOutsourcing] = await Promise.all([
+    listInvoicesByMonth(yearMonth),
+    listOutsourcingByMonth(yearMonth),
+  ]);
+  if (curInvoices.length > 0 || curOutsourcing.length > 0) {
+    return { ok: false, reason: "target-not-empty" };
+  }
+
+  const [prevInvoices, prevOutsourcing] = await Promise.all([
+    listInvoicesByMonth(fromYm),
+    listOutsourcingByMonth(fromYm),
+  ]);
+  if (prevInvoices.length === 0 && prevOutsourcing.length === 0) {
+    return { ok: false, reason: "source-empty" };
+  }
+
+  const prevLineItems = await listLineItemsByInvoiceIds(
+    prevInvoices.map((i) => i.id),
+  );
+
+  // 連番のベースを一度だけ取得し、ループ内ではローカル加算（トランザクション内の
+  // 未コミット行は別クエリから見えないため、再採番せずローカルで採番する）
+  const firstNumber = await nextInvoiceNumber(yearMonth);
+  let seq = parseInt(firstNumber.slice(yearMonth.length + 1), 10) || 1;
+
+  const issueDate = `${yearMonth}-01`;
+  const dueDate = dueDateFor(yearMonth);
+
+  await getDb().transaction(async (tx) => {
+    for (const inv of prevInvoices) {
+      const invoiceNumber = `${yearMonth}-${String(seq).padStart(3, "0")}`;
+      seq += 1;
+      const inserted = await tx
+        .insert(invoices)
+        .values({
+          invoiceNumber,
+          clientId: inv.clientId,
+          yearMonth,
+          issueDate,
+          dueDate,
+          amountInclTax: inv.amountInclTax,
+          amountExclTax: inv.amountExclTax,
+          taxAmount: inv.taxAmount,
+          status: "draft",
+          pdfUrl: null,
+          memo: inv.memo,
+          sentAt: null,
+          paidAt: null,
+        })
+        .returning({ id: invoices.id });
+      const newInvoiceId = inserted[0].id;
+
+      const items = prevLineItems[inv.id] ?? [];
+      if (items.length > 0) {
+        await tx.insert(invoiceLineItems).values(
+          items.map((it) => ({
+            invoiceId: newInvoiceId,
+            description: it.description,
+            deliveryDate: null,
+            unitPrice: it.unitPrice,
+            quantity: it.quantity,
+            unit: it.unit,
+            subtotal: it.subtotal,
+            sortOrder: it.sortOrder,
+          })),
+        );
+      }
+    }
+
+    if (prevOutsourcing.length > 0) {
+      await tx.insert(outsourcingCosts).values(
+        prevOutsourcing.map((o) => ({
+          yearMonth,
+          contractorName: o.contractorName,
+          amountInclTax: o.amountInclTax,
+          memo: o.memo,
+        })),
+      );
+    }
+  });
+
+  revalidatePath(`/accounting/months/${yearMonth}`);
+  return {
+    ok: true,
+    invoices: prevInvoices.length,
+    outsourcing: prevOutsourcing.length,
+    fromYm,
+  };
+}
 
 async function recomputeInvoiceTotals(invoiceId: string): Promise<string | null> {
   const items = await getDb()

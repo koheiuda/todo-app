@@ -11,6 +11,7 @@ import { formatYearMonth, formatYen } from "@/lib/accounting/utils";
 import Link from "next/link";
 import { AddInvoiceRow } from "./_components/add-invoice-row";
 import { AddOutsourcingRow } from "./_components/add-outsourcing-row";
+import { CopyPreviousMonthButton } from "./_components/copy-previous-month-button";
 import { InvoiceBlock } from "./_components/invoice-block";
 import { OutsourcingRow } from "./_components/outsourcing-row";
 
@@ -48,6 +49,17 @@ export default async function MonthDetailPage({
 
   const prevYm = shiftMonth(ym, -1);
   const nextYm = shiftMonth(ym, 1);
+
+  // 当月が完全に空のときだけ「前月コピー」を提案（前月にデータがある場合のみ）
+  const isEmpty = invoices.length === 0 && outsourcing.length === 0;
+  let canCopyFromPrev = false;
+  if (isEmpty) {
+    const [prevInv, prevOut] = await Promise.all([
+      listInvoicesByMonth(prevYm),
+      listOutsourcingByMonth(prevYm),
+    ]);
+    canCopyFromPrev = prevInv.length > 0 || prevOut.length > 0;
+  }
 
   return (
     <div>
@@ -88,6 +100,20 @@ export default async function MonthDetailPage({
         <div className="mb-8 text-sm text-neutral-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
           <span className="font-medium">メモ：</span>
           {summary.memo}
+        </div>
+      ) : null}
+
+      {canCopyFromPrev ? (
+        <div className="mb-8 flex items-center justify-between gap-4 bg-blue-50 border border-blue-200 rounded-md px-4 py-3">
+          <p className="text-sm text-blue-900">
+            まだ入力がありません。
+            <span className="font-medium">{formatYearMonth(prevYm)}</span>
+            の請求先・外注費をそのままコピーして、見込みの叩き台にできます。
+          </p>
+          <CopyPreviousMonthButton
+            yearMonth={ym}
+            prevLabel={formatYearMonth(prevYm)}
+          />
         </div>
       ) : null}
 
