@@ -75,6 +75,28 @@ X APIの2026/4/20改定で、URL付き投稿が `$0.20`（通常投稿の約13�
 本アプリは「ツリー投稿モード」をデフォルトON にして、本体は URL なし（$0.015）、URLはリプライ（$0.01）に分離します。
 1記事あたり **$0.20 → $0.025** に圧縮。
 
+## 筋トレコーチ（`/training`）
+
+ベンチMAX 110→115kg（6月末）に向けて、毎日その日の状況を報告すると Claude が
+パーソナルトレーナーとしてフィードバックを返し、逆算計画を都度リブラッシュアップするタブ。
+
+- ベースプラン（プロフィール・栄養・4週ロードマップ）は [lib/training/plan.ts](./lib/training/plan.ts) に定数化。
+- 報告ログ・下書きは **localStorage** に保存（ログイン・DB不要）。保存処理は [lib/training/store.ts](./lib/training/store.ts) に抽象化済みで、将来クラウドDBへ差し替え可能。
+- AIフィードバックはサーバ側 API ルート [app/api/coach/route.ts](./app/api/coach/route.ts) 経由で Anthropic を呼ぶ。**APIキーはクライアントに露出しない。**
+- モデルは `claude-opus-4-8`、取得失敗時は `claude-sonnet-4-6` に自動フォールバック。
+
+### 必要な環境変数
+
+`ANTHROPIC_API_KEY` のみ（上の環境変数テーブル参照、SEO News と共通）。
+
+```bash
+# .env.local（ローカル）
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Vercel では Settings → Environment Variables に `ANTHROPIC_API_KEY` を
+Production / Preview / Development それぞれ設定すれば本番でも動作する。
+
 ## デプロイ（Vercel）
 
 1. このリポジトリをGitHubにpush

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTodo } from "@/components/todo/todo-context";
 
 type Section = {
-  id: "todo" | "news" | "accounting";
+  id: "todo" | "news" | "accounting" | "training";
   label: string;
   href: string;
   isActive: (pathname: string) => boolean;
@@ -33,6 +33,12 @@ const SECTIONS: Section[] = [
     label: "会計",
     href: "/accounting",
     isActive: (p) => p.startsWith("/accounting"),
+  },
+  {
+    id: "training",
+    label: "筋トレ",
+    href: "/training",
+    isActive: (p) => p.startsWith("/training"),
   },
 ];
 
