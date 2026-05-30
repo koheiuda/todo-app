@@ -3,8 +3,10 @@
 import { getDb } from "@/lib/db";
 import {
   clients,
+  fiscalPeriods,
   invoiceLineItems,
   invoices,
+  monthlySummaries,
   outsourcingCosts,
   type Invoice,
   type InvoiceLineItem,
@@ -32,6 +34,70 @@ function dueDateFor(yearMonth: string): string {
   due.setMonth(due.getMonth() + 2);
   due.setDate(0);
   return due.toISOString().slice(0, 10);
+}
+
+/**
+ * その月の月次サマリ(monthly_summaries)を、当月の請求先(invoices)・外注費(outsourcing)の
+ * 実データから再計算してダッシュボード/月次一覧に反映する。memo は保持。
+ *
+ * 注意: 過去の取込月（invoices を持たずサマリ集計値だけの月）に対して呼ぶと 0 で上書きされる。
+ * そのため「請求先・外注費を実際に編集した月」に対してのみ呼ぶこと（各 mutation の末尾）。
+ */
+async function recomputeMonthlySummary(yearMonth: string) {
+  const [invRows, outRows] = await Promise.all([
+    getDb()
+      .select({ amt: invoices.amountInclTax })
+      .from(invoices)
+      .where(eq(invoices.yearMonth, yearMonth)),
+    getDb()
+      .select({ amt: outsourcingCosts.amountInclTax })
+      .from(outsourcingCosts)
+      .where(eq(outsourcingCosts.yearMonth, yearMonth)),
+  ]);
+  const revenueInclTax = invRows.reduce((s, r) => s + r.amt, 0);
+  const totalExpense = outRows.reduce((s, r) => s + r.amt, 0);
+  const grossProfit = revenueInclTax - totalExpense;
+  const grossMarginRate =
+    revenueInclTax > 0 ? (grossProfit / revenueInclTax).toFixed(4) : "0";
+
+  const existing = await getDb()
+    .select()
+    .from(monthlySummaries)
+    .where(eq(monthlySummaries.yearMonth, yearMonth))
+    .limit(1);
+
+  if (existing[0]) {
+    await getDb()
+      .update(monthlySummaries)
+      .set({
+        revenueInclTax,
+        totalExpense,
+        grossProfit,
+        grossMarginRate,
+        updatedAt: new Date(),
+      })
+      .where(eq(monthlySummaries.id, existing[0].id));
+  } else {
+    const day = `${yearMonth}-01`;
+    const periods = await getDb().select().from(fiscalPeriods);
+    const period = periods.find(
+      (p) => p.startDate <= day && p.endDate >= day,
+    );
+    if (!period) return;
+    await getDb().insert(monthlySummaries).values({
+      fiscalPeriodId: period.id,
+      yearMonth,
+      revenueInclTax,
+      totalExpense,
+      grossProfit,
+      grossMarginRate,
+      memo: null,
+    });
+  }
+
+  // ダッシュボード・月次一覧にも即反映
+  revalidatePath("/accounting");
+  revalidatePath("/accounting/months");
 }
 
 async function nextInvoiceSortOrder(yearMonth: string): Promise<number> {
@@ -188,6 +254,7 @@ export async function copyFromPreviousMonth(
   });
 
   revalidatePath(`/accounting/months/${yearMonth}`);
+  await recomputeMonthlySummary(yearMonth);
   return {
     ok: true,
     invoices: prevInvoices.length,
@@ -258,6 +325,7 @@ async function doAddInvoice(
     sortOrder,
   });
   revalidatePath(`/accounting/months/${yearMonth}`);
+  await recomputeMonthlySummary(yearMonth);
 }
 
 export async function addInvoice(yearMonth: string, input: unknown) {
@@ -333,6 +401,7 @@ export async function updateInvoiceAmount(
     })
     .where(eq(invoices.id, invoiceId));
   revalidatePath(`/accounting/months/${inv[0].yearMonth}`);
+  await recomputeMonthlySummary(inv[0].yearMonth);
 }
 
 export async function updateInvoiceMemo(invoiceId: string, memo: string) {
@@ -412,6 +481,7 @@ export async function deleteInvoice(
     .where(eq(invoiceLineItems.invoiceId, invoiceId));
   await getDb().delete(invoices).where(eq(invoices.id, invoiceId));
   revalidatePath(`/accounting/months/${inv[0].yearMonth}`);
+  await recomputeMonthlySummary(inv[0].yearMonth);
   return { invoice: inv[0], lineItems: items };
 }
 
@@ -425,6 +495,7 @@ export async function restoreInvoice(snapshot: DeletedInvoiceSnapshot) {
     }
   });
   revalidatePath(`/accounting/months/${invoice.yearMonth}`);
+  await recomputeMonthlySummary(invoice.yearMonth);
 }
 
 const OutsourcingSchema = z.object({
@@ -444,6 +515,7 @@ export async function addOutsourcing(yearMonth: string, input: unknown) {
     sortOrder,
   });
   revalidatePath(`/accounting/months/${yearMonth}`);
+  await recomputeMonthlySummary(yearMonth);
 }
 
 export async function updateOutsourcing(
@@ -466,6 +538,7 @@ export async function updateOutsourcing(
     .set(patch)
     .where(eq(outsourcingCosts.id, id));
   revalidatePath(`/accounting/months/${row[0].yearMonth}`);
+  await recomputeMonthlySummary(row[0].yearMonth);
 }
 
 const LineItemAddSchema = z.object({
@@ -499,7 +572,10 @@ export async function addLineItem(invoiceId: string, input: unknown) {
     sortOrder: Number(lastSort[0]?.max ?? 0) + 1,
   });
   const ym = await recomputeInvoiceTotals(invoiceId);
-  if (ym) revalidatePath(`/accounting/months/${ym}`);
+  if (ym) {
+    revalidatePath(`/accounting/months/${ym}`);
+    await recomputeMonthlySummary(ym);
+  }
 }
 
 export async function updateLineItem(
@@ -540,7 +616,10 @@ export async function updateLineItem(
     .set(patch)
     .where(eq(invoiceLineItems.id, itemId));
   const ym = await recomputeInvoiceTotals(row[0].invoiceId);
-  if (ym) revalidatePath(`/accounting/months/${ym}`);
+  if (ym) {
+    revalidatePath(`/accounting/months/${ym}`);
+    await recomputeMonthlySummary(ym);
+  }
 }
 
 export async function deleteLineItem(
@@ -554,7 +633,10 @@ export async function deleteLineItem(
   if (!row[0]) return null;
   await getDb().delete(invoiceLineItems).where(eq(invoiceLineItems.id, itemId));
   const ym = await recomputeInvoiceTotals(row[0].invoiceId);
-  if (ym) revalidatePath(`/accounting/months/${ym}`);
+  if (ym) {
+    revalidatePath(`/accounting/months/${ym}`);
+    await recomputeMonthlySummary(ym);
+  }
   return row[0];
 }
 
@@ -562,7 +644,10 @@ export async function deleteLineItem(
 export async function restoreLineItem(item: InvoiceLineItem) {
   await getDb().insert(invoiceLineItems).values(item);
   const ym = await recomputeInvoiceTotals(item.invoiceId);
-  if (ym) revalidatePath(`/accounting/months/${ym}`);
+  if (ym) {
+    revalidatePath(`/accounting/months/${ym}`);
+    await recomputeMonthlySummary(ym);
+  }
 }
 
 export async function deleteOutsourcing(
@@ -576,6 +661,7 @@ export async function deleteOutsourcing(
   if (!row[0]) return null;
   await getDb().delete(outsourcingCosts).where(eq(outsourcingCosts.id, id));
   revalidatePath(`/accounting/months/${row[0].yearMonth}`);
+  await recomputeMonthlySummary(row[0].yearMonth);
   return row[0];
 }
 
@@ -583,4 +669,5 @@ export async function deleteOutsourcing(
 export async function restoreOutsourcing(row: OutsourcingCost) {
   await getDb().insert(outsourcingCosts).values(row);
   revalidatePath(`/accounting/months/${row.yearMonth}`);
+  await recomputeMonthlySummary(row.yearMonth);
 }
