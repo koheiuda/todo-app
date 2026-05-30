@@ -6,6 +6,7 @@ import {
   GOALS,
   currentWeek,
   daysUntilPeak,
+  formatMenu,
   toYmd,
 } from "@/lib/training/plan";
 import {
@@ -136,7 +137,7 @@ export function TrainingApp() {
                   className="rounded-lg bg-white/10 px-3 py-2 text-sm"
                 >
                   <span className="text-white/60 text-xs block">{d.label}</span>
-                  <span className="font-medium tabular-nums">{d.menu}</span>
+                  <span className="font-medium tabular-nums">{formatMenu(d)}</span>
                 </li>
               ))}
             </ul>

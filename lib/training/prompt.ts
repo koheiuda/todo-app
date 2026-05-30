@@ -9,6 +9,7 @@ import {
   SUPPLEMENTS,
   TRAINING_DAYS,
   WEIGHT_MGMT,
+  formatMenu,
 } from "./plan";
 import { TRAINED_LABELS, type DailyReport, type ReportInput } from "./types";
 
@@ -16,7 +17,7 @@ import { TRAINED_LABELS, type DailyReport, type ReportInput } from "./types";
 export function planAsText(): string {
   const roadmap = ROADMAP.map((w) => {
     const days = w.days
-      .map((d) => `    ${d.label} ${d.menu}${d.role ? `（${d.role}）` : ""}`)
+      .map((d) => `    ${d.label} ${formatMenu(d)}${d.role ? `（${d.role}）` : ""}`)
       .join("\n");
     return `  第${w.week}週(${w.range}) ${w.theme}: ${w.note}\n${days}`;
   }).join("\n");

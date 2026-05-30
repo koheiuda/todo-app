@@ -1,6 +1,6 @@
 "use client";
 
-import { GOALS, ROADMAP, type RoadmapWeek } from "@/lib/training/plan";
+import { GOALS, ROADMAP, formatMenu, type RoadmapWeek } from "@/lib/training/plan";
 
 export function Roadmap({ currentWeekNo }: { currentWeekNo: number | null }) {
   return (
@@ -59,7 +59,7 @@ function WeekCard({ week, active }: { week: RoadmapWeek; active: boolean }) {
             <div className="flex gap-2">
               <span className="text-neutral-400 shrink-0 w-16">{d.label}</span>
               <span className="text-neutral-800 font-medium tabular-nums">
-                {d.menu}
+                {formatMenu(d)}
               </span>
             </div>
             {d.role && (

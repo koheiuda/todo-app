@@ -11,11 +11,33 @@ export const PEAK_DATE = "2026-06-29";
 export type TrainingDay = {
   /** D1 / D2 / D3（=トレ日1/2/3。週3＝月・水・金） */
   label: string;
-  /** メニュー（重量kg × 回数 × セット数） 例: 80×3×4 = 80kgを3回×4セット */
-  menu: string;
+  /** 種目バリエーション（例: ナロー / ポーズ）。通常ベンチは省略 */
+  variation?: string;
+  /** メインセットの重量(kg) */
+  weightKg?: number;
+  /** 回数（"3" / "2〜3" / "1〜2"） */
+  reps?: string;
+  /** セット数 */
+  sets?: number;
+  /** やり方の補足（例: 爆発的 / 速く / 実MAX確認） */
+  cue?: string;
+  /** メインに続く補足（単位込みで記述。例: "＋ 110kg保持10秒 × 2セット"） */
+  extra?: string;
+  /** セットの無い日（休養・本番など）はこちらに自由記述（単位込み） */
+  freeform?: string;
   /** その日の狙い（D1=高重量, D2=スピード, D3=ボリューム/技術 など） */
   role?: string;
 };
+
+/** トレ日のメニューを単位付きの文字列に整形（画面・AIコンテキスト共通） */
+export function formatMenu(d: TrainingDay): string {
+  if (d.freeform) return d.freeform;
+  const v = d.variation ? `${d.variation} ` : "";
+  let s = `${v}${d.weightKg}kg × ${d.reps}回 × ${d.sets}セット`;
+  if (d.cue) s += `（${d.cue}）`;
+  if (d.extra) s += ` ${d.extra}`;
+  return s;
+}
 
 export type RoadmapWeek = {
   week: number;
@@ -35,8 +57,8 @@ export type RoadmapWeek = {
 /** メニュー表記の読み方・用語の解説（画面・AIコンテキスト共通） */
 export const NOTATION_LEGEND: { term: string; desc: string }[] = [
   {
-    term: "重量×回数×セット",
-    desc: "例「80×3×4」= 80kg を 3回、それを 4セット。重量は週ごとに変える",
+    term: "重量 × 回数 × セット",
+    desc: "例「80kg × 3回 × 4セット」= 80kg を 3回、それを 4セット繰り返す。重量は週ごとに変える",
   },
   {
     term: "D1 / D2 / D3",
@@ -124,9 +146,9 @@ export const ROADMAP: RoadmapWeek[] = [
     theme: "再習熟",
     note: "鈍った神経系とフォームを呼び戻す週。重量より「正しい軌道で確実に挙げる」が最優先。105×1が出る今なら余裕を持って入れる。",
     days: [
-      { label: "D1", menu: "80×3×4", role: "高重量に体を慣らす（MAX比 約76%）" },
-      { label: "D2", menu: "60×6×3（爆発的）", role: "胸から弾き飛ばす意識で初速づくり（弱点対策）" },
-      { label: "D3", menu: "75×5×4", role: "中重量でボリュームを稼ぎフォームを反復" },
+      { label: "D1", weightKg: 80, reps: "3", sets: 4, role: "高重量に体を慣らす（MAX比 約76%）" },
+      { label: "D2", weightKg: 60, reps: "6", sets: 3, cue: "爆発的", role: "胸から弾き飛ばす意識で初速づくり（弱点対策）" },
+      { label: "D3", weightKg: 75, reps: "5", sets: 4, role: "中重量でボリュームを稼ぎフォームを反復" },
     ],
   },
   {
@@ -137,9 +159,9 @@ export const ROADMAP: RoadmapWeek[] = [
     theme: "出力強化",
     note: "中間のスティッキングを突破する出力を作る週。三頭と初速にピンポイントで刺激を入れる。",
     days: [
-      { label: "D1", menu: "90×2-3×4", role: "高重量（約86%）で最大筋力を底上げ" },
-      { label: "D2", menu: "ナロー65×8×3", role: "三頭出力を集中強化（弱点の根治）" },
-      { label: "D3", menu: "ポーズ75×4×3", role: "胸で静止し反動なしの中間パワー強化" },
+      { label: "D1", weightKg: 90, reps: "2〜3", sets: 4, role: "高重量（約86%）で最大筋力を底上げ" },
+      { label: "D2", variation: "ナロー", weightKg: 65, reps: "8", sets: 3, role: "三頭出力を集中強化（弱点の根治）" },
+      { label: "D3", variation: "ポーズ", weightKg: 75, reps: "4", sets: 3, role: "胸で静止し反動なしの中間パワー強化" },
     ],
   },
   {
@@ -150,9 +172,9 @@ export const ROADMAP: RoadmapWeek[] = [
     theme: "ピーク",
     note: "神経系を本番のMAXに寄せる週。高重量と110kg保持で“重さ”に体を順応させる。ここのD3が最大の分岐点。",
     days: [
-      { label: "D1", menu: "97.5×1-2×3 ＋ 110kg保持10秒×2", role: "ニアMAX（約93%）＋110kgを担いで神経系を本番重量に順応" },
-      { label: "D2", menu: "65×5×3（速）", role: "軽めを速く。疲労を抜きつつ初速をキープ" },
-      { label: "D3", menu: "102.5×1（実MAX確認）→85×3×3", role: "現MAX確認（約98%）。これが動けば110は射程" },
+      { label: "D1", weightKg: 97.5, reps: "1〜2", sets: 3, extra: "＋ 110kg保持10秒 × 2セット", role: "ニアMAX（約93%）＋110kgを担いで神経系を本番重量に順応" },
+      { label: "D2", weightKg: 65, reps: "5", sets: 3, cue: "速く", role: "軽めを速く。疲労を抜きつつ初速をキープ" },
+      { label: "D3", weightKg: 102.5, reps: "1", sets: 1, cue: "実MAX確認", extra: "→ 85kg × 3回 × 3セット", role: "現MAX確認（約98%）。これが動けば110は射程" },
     ],
   },
   {
@@ -163,9 +185,9 @@ export const ROADMAP: RoadmapWeek[] = [
     theme: "調整",
     note: "疲労を完全に抜いて本番1日にピークを合わせる週。やり込みは厳禁、回復＞刺激。",
     days: [
-      { label: "6/23のみ", menu: "70×3×2", role: "軽く動作だけ確認（神経の入れ直し）" },
-      { label: "以降", menu: "完全休養", role: "神経系をフル回復させる" },
-      { label: "6/29", menu: "本番 110→115", role: "110を確実に。調子が良ければ115へ挑戦" },
+      { label: "6/23のみ", weightKg: 70, reps: "3", sets: 2, role: "軽く動作だけ確認（神経の入れ直し）" },
+      { label: "以降", freeform: "完全休養", role: "神経系をフル回復させる" },
+      { label: "6/29", freeform: "本番：110kg → 115kg に挑戦", role: "110を確実に。調子が良ければ115へ挑戦" },
     ],
   },
 ];
