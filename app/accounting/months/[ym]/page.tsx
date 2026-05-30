@@ -12,8 +12,8 @@ import Link from "next/link";
 import { AddInvoiceRow } from "./_components/add-invoice-row";
 import { AddOutsourcingRow } from "./_components/add-outsourcing-row";
 import { CopyPreviousMonthButton } from "./_components/copy-previous-month-button";
-import { InvoiceBlock } from "./_components/invoice-block";
-import { OutsourcingRow } from "./_components/outsourcing-row";
+import { InvoiceTableBody } from "./_components/invoice-table-body";
+import { OutsourcingTableBody } from "./_components/outsourcing-table-body";
 
 export const dynamic = "force-dynamic";
 
@@ -181,14 +181,12 @@ export default async function MonthDetailPage({
                   </td>
                 </tr>
               ) : (
-                invoices.map((inv, i) => (
-                  <InvoiceBlock
-                    key={inv.id}
-                    invoice={inv}
-                    index={i}
-                    lineItems={lineItemsByInvoice[inv.id] ?? []}
-                  />
-                ))
+                <InvoiceTableBody
+                  key={invoices.map((i) => i.id).slice().sort().join("|")}
+                  yearMonth={ym}
+                  invoices={invoices}
+                  lineItemsByInvoice={lineItemsByInvoice}
+                />
               )}
             </tbody>
             {invoices.length > 0 ? (
@@ -246,9 +244,11 @@ export default async function MonthDetailPage({
                   </td>
                 </tr>
               ) : (
-                outsourcing.map((o, i) => (
-                  <OutsourcingRow key={o.id} row={o} index={i} />
-                ))
+                <OutsourcingTableBody
+                  key={outsourcing.map((o) => o.id).slice().sort().join("|")}
+                  yearMonth={ym}
+                  rows={outsourcing}
+                />
               )}
             </tbody>
             {outsourcing.length > 0 ? (

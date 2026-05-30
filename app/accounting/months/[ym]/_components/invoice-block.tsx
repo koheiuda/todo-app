@@ -15,6 +15,8 @@ import {
 } from "../actions";
 import { IssuePdfButton } from "./issue-pdf-button";
 import { NumberCell, TextCell, TextareaCell } from "./editable-cells";
+import { DragHandle } from "./drag-handle";
+import type { RowDnd } from "./use-row-dnd";
 
 type InvoiceWithClient = Invoice & { client: Client | null };
 
@@ -22,10 +24,12 @@ export function InvoiceBlock({
   invoice,
   index,
   lineItems,
+  dnd,
 }: {
   invoice: InvoiceWithClient;
   index: number;
   lineItems: InvoiceLineItem[];
+  dnd?: RowDnd;
 }) {
   const hasItems = lineItems.length > 0;
   const totalRows = (hasItems ? lineItems.length : 1) + 1;
@@ -37,6 +41,7 @@ export function InvoiceBlock({
         index={index}
         spanCount={totalRows}
         firstItem={lineItems[0] ?? null}
+        dnd={dnd}
       />
       {lineItems.slice(1).map((item) => (
         <LineItemOnlyRow key={item.id} item={item} />
@@ -51,11 +56,13 @@ function InvoiceFirstRow({
   index,
   spanCount,
   firstItem,
+  dnd,
 }: {
   invoice: InvoiceWithClient;
   index: number;
   spanCount: number;
   firstItem: InvoiceLineItem | null;
+  dnd?: RowDnd;
 }) {
   const [pending, start] = useTransition();
   const amountsLocked = firstItem !== null;
@@ -78,12 +85,24 @@ function InvoiceFirstRow({
   }
 
   return (
-    <tr className="border-t-2 border-neutral-300">
+    <tr
+      className={`border-t-2 ${
+        dnd?.isOver ? "border-blue-500" : "border-neutral-300"
+      }`}
+      draggable={dnd?.draggable ?? false}
+      onDragStart={dnd?.onDragStart}
+      onDragOver={dnd?.onDragOver}
+      onDrop={dnd?.onDrop}
+      onDragEnd={dnd?.onDragEnd}
+    >
       <td
         rowSpan={spanCount}
-        className="px-2 py-2 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
+        className="px-1 py-2 text-center text-neutral-500 tabular-nums align-top border-r border-neutral-200"
       >
-        {index + 1}
+        <div className="flex flex-col items-center gap-0.5">
+          {dnd ? <DragHandle handle={dnd.handle} /> : null}
+          <span>{index + 1}</span>
+        </div>
       </td>
       <td
         rowSpan={spanCount}

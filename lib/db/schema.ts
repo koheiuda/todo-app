@@ -197,6 +197,7 @@ export const invoices = pgTable("invoices", {
   status: invoiceStatusEnum("status").notNull().default("draft"),
   pdfUrl: varchar("pdf_url", { length: 512 }),
   memo: text("memo"),
+  sortOrder: integer("sort_order").notNull().default(0),
   sentAt: timestamp("sent_at", { withTimezone: true }),
   paidAt: timestamp("paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -229,6 +230,7 @@ export const outsourcingCosts = pgTable("outsourcing_costs", {
   contractorName: varchar("contractor_name", { length: 255 }).notNull(),
   amountInclTax: integer("amount_incl_tax").notNull().default(0),
   memo: text("memo"),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -4,13 +4,17 @@ import type { OutsourcingCost } from "@/lib/db/schema";
 import { useTransition } from "react";
 import { deleteOutsourcing, updateOutsourcing } from "../actions";
 import { NumberCell, TextCell } from "./editable-cells";
+import { DragHandle } from "./drag-handle";
+import type { RowDnd } from "./use-row-dnd";
 
 export function OutsourcingRow({
   row,
   index,
+  dnd,
 }: {
   row: OutsourcingCost;
   index: number;
+  dnd?: RowDnd;
 }) {
   const [pending, start] = useTransition();
 
@@ -22,8 +26,22 @@ export function OutsourcingRow({
   }
 
   return (
-    <tr className="border-b border-neutral-100 last:border-b-0 hover:bg-neutral-50">
-      <td className="px-2 py-2 text-center text-neutral-500 tabular-nums">{index + 1}</td>
+    <tr
+      className={`border-b border-neutral-100 last:border-b-0 hover:bg-neutral-50 ${
+        dnd?.isOver ? "border-t-2 border-t-blue-500" : ""
+      }`}
+      draggable={dnd?.draggable ?? false}
+      onDragStart={dnd?.onDragStart}
+      onDragOver={dnd?.onDragOver}
+      onDrop={dnd?.onDrop}
+      onDragEnd={dnd?.onDragEnd}
+    >
+      <td className="px-1 py-2 text-center text-neutral-500 tabular-nums">
+        <div className="flex items-center justify-center gap-1">
+          {dnd ? <DragHandle handle={dnd.handle} /> : null}
+          <span>{index + 1}</span>
+        </div>
+      </td>
       <td className="px-2 py-1.5 font-medium text-neutral-900">
         <TextCell
           initial={row.contractorName}

@@ -121,7 +121,7 @@ export async function listInvoicesByMonth(
     .from(invoices)
     .leftJoin(clients, eq(invoices.clientId, clients.id))
     .where(eq(invoices.yearMonth, yearMonth))
-    .orderBy(asc(invoices.invoiceNumber));
+    .orderBy(asc(invoices.sortOrder), asc(invoices.invoiceNumber));
   return rows.map((r) => ({ ...r.invoice, client: r.client }));
 }
 
@@ -183,7 +183,7 @@ export async function listOutsourcingByMonth(
     .select()
     .from(outsourcingCosts)
     .where(eq(outsourcingCosts.yearMonth, yearMonth))
-    .orderBy(asc(outsourcingCosts.createdAt));
+    .orderBy(asc(outsourcingCosts.sortOrder), asc(outsourcingCosts.createdAt));
 }
 
 export async function nextInvoiceNumber(yearMonth: string): Promise<string> {

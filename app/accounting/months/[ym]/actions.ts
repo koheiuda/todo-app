@@ -6,7 +6,7 @@ import {
   invoices,
   outsourcingCosts,
 } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -27,6 +27,61 @@ function dueDateFor(yearMonth: string): string {
   due.setMonth(due.getMonth() + 2);
   due.setDate(0);
   return due.toISOString().slice(0, 10);
+}
+
+async function nextInvoiceSortOrder(yearMonth: string): Promise<number> {
+  const rows = await getDb()
+    .select({ max: sql<number>`COALESCE(MAX(${invoices.sortOrder}), -1)` })
+    .from(invoices)
+    .where(eq(invoices.yearMonth, yearMonth));
+  return Number(rows[0]?.max ?? -1) + 1;
+}
+
+async function nextOutsourcingSortOrder(yearMonth: string): Promise<number> {
+  const rows = await getDb()
+    .select({ max: sql<number>`COALESCE(MAX(${outsourcingCosts.sortOrder}), -1)` })
+    .from(outsourcingCosts)
+    .where(eq(outsourcingCosts.yearMonth, yearMonth));
+  return Number(rows[0]?.max ?? -1) + 1;
+}
+
+/** 請求先の表示順を保存（D&D後）。id配列の順に sort_order を 0,1,2... で振り直す。 */
+export async function reorderInvoices(yearMonth: string, orderedIds: string[]) {
+  await getDb().transaction(async (tx) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await tx
+        .update(invoices)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(
+          and(
+            eq(invoices.id, orderedIds[i]),
+            eq(invoices.yearMonth, yearMonth),
+          ),
+        );
+    }
+  });
+  revalidatePath(`/accounting/months/${yearMonth}`);
+}
+
+/** 外注費の表示順を保存（D&D後）。 */
+export async function reorderOutsourcing(
+  yearMonth: string,
+  orderedIds: string[],
+) {
+  await getDb().transaction(async (tx) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await tx
+        .update(outsourcingCosts)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(
+          and(
+            eq(outsourcingCosts.id, orderedIds[i]),
+            eq(outsourcingCosts.yearMonth, yearMonth),
+          ),
+        );
+    }
+  });
+  revalidatePath(`/accounting/months/${yearMonth}`);
 }
 
 export type CopyPrevMonthResult =
@@ -72,6 +127,7 @@ export async function copyFromPreviousMonth(
   const dueDate = dueDateFor(yearMonth);
 
   await getDb().transaction(async (tx) => {
+    let invSort = 0;
     for (const inv of prevInvoices) {
       const invoiceNumber = `${yearMonth}-${String(seq).padStart(3, "0")}`;
       seq += 1;
@@ -91,6 +147,7 @@ export async function copyFromPreviousMonth(
           memo: inv.memo,
           sentAt: null,
           paidAt: null,
+          sortOrder: invSort++,
         })
         .returning({ id: invoices.id });
       const newInvoiceId = inserted[0].id;
@@ -114,11 +171,12 @@ export async function copyFromPreviousMonth(
 
     if (prevOutsourcing.length > 0) {
       await tx.insert(outsourcingCosts).values(
-        prevOutsourcing.map((o) => ({
+        prevOutsourcing.map((o, i) => ({
           yearMonth,
           contractorName: o.contractorName,
           amountInclTax: o.amountInclTax,
           memo: o.memo,
+          sortOrder: i,
         })),
       );
     }
@@ -177,6 +235,7 @@ export async function addInvoice(yearMonth: string, input: unknown) {
   due.setMonth(due.getMonth() + 2);
   due.setDate(0);
   const dueDate = due.toISOString().slice(0, 10);
+  const sortOrder = await nextInvoiceSortOrder(yearMonth);
 
   await getDb().insert(invoices).values({
     invoiceNumber,
@@ -189,6 +248,7 @@ export async function addInvoice(yearMonth: string, input: unknown) {
     taxAmount: tax,
     status: "draft",
     memo: data.memo ?? null,
+    sortOrder,
   });
   revalidatePath(`/accounting/months/${yearMonth}`);
 }
@@ -302,11 +362,13 @@ const OutsourcingSchema = z.object({
 
 export async function addOutsourcing(yearMonth: string, input: unknown) {
   const data = OutsourcingSchema.parse(input);
+  const sortOrder = await nextOutsourcingSortOrder(yearMonth);
   await getDb().insert(outsourcingCosts).values({
     yearMonth,
     contractorName: data.contractorName,
     amountInclTax: data.amountInclTax,
     memo: data.memo ?? null,
+    sortOrder,
   });
   revalidatePath(`/accounting/months/${yearMonth}`);
 }
