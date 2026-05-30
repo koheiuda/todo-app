@@ -3,10 +3,13 @@
 import type { Client, Invoice, InvoiceLineItem } from "@/lib/db/schema";
 import { formatYen } from "@/lib/accounting/utils";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   addLineItem,
   deleteInvoice,
   deleteLineItem,
+  restoreInvoice,
+  restoreLineItem,
   toggleInvoicePaid,
   toggleInvoiceSent,
   updateInvoiceAmount,
@@ -80,7 +83,17 @@ function InvoiceFirstRow({
   function removeInvoice() {
     if (!confirm(`「${invoice.client?.name ?? ""}」を削除しますか？`)) return;
     start(async () => {
-      await deleteInvoice(invoice.id);
+      const snap = await deleteInvoice(invoice.id);
+      if (snap) {
+        toast.success(`「${invoice.client?.name ?? "請求先"}」を削除しました`, {
+          action: {
+            label: "元に戻す",
+            onClick: () => {
+              void restoreInvoice(snap);
+            },
+          },
+        });
+      }
     });
   }
 
@@ -242,7 +255,17 @@ function LineItemCells({ item }: { item: InvoiceLineItem }) {
 
   function remove() {
     start(async () => {
-      await deleteLineItem(item.id);
+      const snap = await deleteLineItem(item.id);
+      if (snap) {
+        toast.success("明細を削除しました", {
+          action: {
+            label: "元に戻す",
+            onClick: () => {
+              void restoreLineItem(snap);
+            },
+          },
+        });
+      }
     });
   }
 

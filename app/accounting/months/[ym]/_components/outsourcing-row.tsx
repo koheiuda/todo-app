@@ -2,7 +2,12 @@
 
 import type { OutsourcingCost } from "@/lib/db/schema";
 import { useTransition } from "react";
-import { deleteOutsourcing, updateOutsourcing } from "../actions";
+import { toast } from "sonner";
+import {
+  deleteOutsourcing,
+  restoreOutsourcing,
+  updateOutsourcing,
+} from "../actions";
 import { NumberCell, TextCell } from "./editable-cells";
 import { DragHandle } from "./drag-handle";
 import type { RowDnd } from "./use-row-dnd";
@@ -21,7 +26,17 @@ export function OutsourcingRow({
   function remove() {
     if (!confirm(`「${row.contractorName}」を削除しますか？`)) return;
     start(async () => {
-      await deleteOutsourcing(row.id);
+      const snap = await deleteOutsourcing(row.id);
+      if (snap) {
+        toast.success(`「${row.contractorName}」を削除しました`, {
+          action: {
+            label: "元に戻す",
+            onClick: () => {
+              void restoreOutsourcing(snap);
+            },
+          },
+        });
+      }
     });
   }
 

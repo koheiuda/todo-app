@@ -6,6 +6,9 @@ import {
   invoiceLineItems,
   invoices,
   outsourcingCosts,
+  type Invoice,
+  type InvoiceLineItem,
+  type OutsourcingCost,
 } from "@/lib/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -386,18 +389,42 @@ export async function toggleInvoicePaid(invoiceId: string, value: boolean) {
   revalidatePath(`/accounting/months/${inv[0].yearMonth}`);
 }
 
-export async function deleteInvoice(invoiceId: string) {
+export type DeletedInvoiceSnapshot = {
+  invoice: Invoice;
+  lineItems: InvoiceLineItem[];
+};
+
+export async function deleteInvoice(
+  invoiceId: string,
+): Promise<DeletedInvoiceSnapshot | null> {
   const inv = await getDb()
     .select()
     .from(invoices)
     .where(eq(invoices.id, invoiceId))
     .limit(1);
-  if (!inv[0]) return;
+  if (!inv[0]) return null;
+  const items = await getDb()
+    .select()
+    .from(invoiceLineItems)
+    .where(eq(invoiceLineItems.invoiceId, invoiceId));
   await getDb()
     .delete(invoiceLineItems)
     .where(eq(invoiceLineItems.invoiceId, invoiceId));
   await getDb().delete(invoices).where(eq(invoices.id, invoiceId));
   revalidatePath(`/accounting/months/${inv[0].yearMonth}`);
+  return { invoice: inv[0], lineItems: items };
+}
+
+/** deleteInvoice で得たスナップショットから請求先（明細含む）を復元する。 */
+export async function restoreInvoice(snapshot: DeletedInvoiceSnapshot) {
+  const { invoice, lineItems } = snapshot;
+  await getDb().transaction(async (tx) => {
+    await tx.insert(invoices).values(invoice);
+    if (lineItems.length > 0) {
+      await tx.insert(invoiceLineItems).values(lineItems);
+    }
+  });
+  revalidatePath(`/accounting/months/${invoice.yearMonth}`);
 }
 
 const OutsourcingSchema = z.object({
@@ -516,25 +543,44 @@ export async function updateLineItem(
   if (ym) revalidatePath(`/accounting/months/${ym}`);
 }
 
-export async function deleteLineItem(itemId: string) {
+export async function deleteLineItem(
+  itemId: string,
+): Promise<InvoiceLineItem | null> {
   const row = await getDb()
     .select()
     .from(invoiceLineItems)
     .where(eq(invoiceLineItems.id, itemId))
     .limit(1);
-  if (!row[0]) return;
+  if (!row[0]) return null;
   await getDb().delete(invoiceLineItems).where(eq(invoiceLineItems.id, itemId));
   const ym = await recomputeInvoiceTotals(row[0].invoiceId);
   if (ym) revalidatePath(`/accounting/months/${ym}`);
+  return row[0];
 }
 
-export async function deleteOutsourcing(id: string) {
+/** deleteLineItem で得た明細を復元する。 */
+export async function restoreLineItem(item: InvoiceLineItem) {
+  await getDb().insert(invoiceLineItems).values(item);
+  const ym = await recomputeInvoiceTotals(item.invoiceId);
+  if (ym) revalidatePath(`/accounting/months/${ym}`);
+}
+
+export async function deleteOutsourcing(
+  id: string,
+): Promise<OutsourcingCost | null> {
   const row = await getDb()
     .select()
     .from(outsourcingCosts)
     .where(eq(outsourcingCosts.id, id))
     .limit(1);
-  if (!row[0]) return;
+  if (!row[0]) return null;
   await getDb().delete(outsourcingCosts).where(eq(outsourcingCosts.id, id));
   revalidatePath(`/accounting/months/${row[0].yearMonth}`);
+  return row[0];
+}
+
+/** deleteOutsourcing で得た外注費を復元する。 */
+export async function restoreOutsourcing(row: OutsourcingCost) {
+  await getDb().insert(outsourcingCosts).values(row);
+  revalidatePath(`/accounting/months/${row.yearMonth}`);
 }
