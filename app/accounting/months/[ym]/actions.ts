@@ -2,6 +2,7 @@
 
 import { getDb } from "@/lib/db";
 import {
+  clients,
   invoiceLineItems,
   invoices,
   outsourcingCosts,
@@ -10,6 +11,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  getClientByName,
   listInvoicesByMonth,
   listLineItemsByInvoiceIds,
   listOutsourcingByMonth,
@@ -225,24 +227,26 @@ const InvoiceRowSchema = z.object({
   memo: z.string().trim().optional().nullable(),
 });
 
-export async function addInvoice(yearMonth: string, input: unknown) {
-  const data = InvoiceRowSchema.parse(input);
+async function doAddInvoice(
+  yearMonth: string,
+  data: {
+    clientId: string;
+    amountInclTax: number;
+    amountExclTax?: number;
+    memo?: string | null;
+  },
+) {
   const invoiceNumber = await nextInvoiceNumber(yearMonth);
   const exclTax = data.amountExclTax ?? Math.round(data.amountInclTax / 1.1);
   const tax = data.amountInclTax - exclTax;
-  const issueDate = `${yearMonth}-01`;
-  const due = new Date(`${yearMonth}-01`);
-  due.setMonth(due.getMonth() + 2);
-  due.setDate(0);
-  const dueDate = due.toISOString().slice(0, 10);
   const sortOrder = await nextInvoiceSortOrder(yearMonth);
 
   await getDb().insert(invoices).values({
     invoiceNumber,
     clientId: data.clientId,
     yearMonth,
-    issueDate,
-    dueDate,
+    issueDate: `${yearMonth}-01`,
+    dueDate: dueDateFor(yearMonth),
     amountInclTax: data.amountInclTax,
     amountExclTax: exclTax,
     taxAmount: tax,
@@ -251,6 +255,48 @@ export async function addInvoice(yearMonth: string, input: unknown) {
     sortOrder,
   });
   revalidatePath(`/accounting/months/${yearMonth}`);
+}
+
+export async function addInvoice(yearMonth: string, input: unknown) {
+  const data = InvoiceRowSchema.parse(input);
+  await doAddInvoice(yearMonth, data);
+}
+
+const InvoiceByNameSchema = z.object({
+  clientName: z.string().trim().min(1, "請求先名を入力してください"),
+  amountInclTax: z.number().int().min(0),
+  amountExclTax: z.number().int().min(0).optional(),
+  memo: z.string().trim().optional().nullable(),
+});
+
+/**
+ * 取引先名から請求先を追加。既存の取引先名なら再利用し、未登録なら
+ * その場で取引先(clients)を新規作成してから請求先を追加する。
+ * （事前に取引先マスタへ登録しなくても請求先を足せるようにするため）
+ */
+export async function addInvoiceByClientName(
+  yearMonth: string,
+  input: unknown,
+) {
+  const data = InvoiceByNameSchema.parse(input);
+  const existing = await getClientByName(data.clientName);
+  let clientId: string;
+  if (existing) {
+    clientId = existing.id;
+  } else {
+    const created = await getDb()
+      .insert(clients)
+      .values({ name: data.clientName, honorific: "御中", isActive: true })
+      .returning({ id: clients.id });
+    clientId = created[0].id;
+    revalidatePath("/accounting/clients");
+  }
+  await doAddInvoice(yearMonth, {
+    clientId,
+    amountInclTax: data.amountInclTax,
+    amountExclTax: data.amountExclTax,
+    memo: data.memo,
+  });
 }
 
 export async function updateInvoiceAmount(
