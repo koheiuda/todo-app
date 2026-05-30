@@ -3,7 +3,6 @@ import { MonthlyTrendChart } from "@/components/accounting/monthly-trend-chart";
 import { PageHeader } from "@/components/accounting/page-header";
 import {
   getCurrentFiscalPeriod,
-  getMonthlySummary,
   listMonthlySummariesByPeriod,
 } from "@/lib/accounting/queries";
 import { formatYearMonth, formatYen } from "@/lib/accounting/utils";
@@ -11,10 +10,6 @@ import Link from "next/link";
 
 export const metadata = { title: "ダッシュボード | Mesut 会計管理" };
 export const dynamic = "force-dynamic";
-
-function currentYearMonth(d = new Date()): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
 
 export default async function AccountingDashboardPage() {
   const period = await getCurrentFiscalPeriod();
@@ -35,11 +30,7 @@ export default async function AccountingDashboardPage() {
     );
   }
 
-  const currentYm = currentYearMonth();
-  const [months, currentMonth] = await Promise.all([
-    listMonthlySummariesByPeriod(period.id),
-    getMonthlySummary(currentYm),
-  ]);
+  const months = await listMonthlySummariesByPeriod(period.id);
 
   const revenueTotal = months.reduce((s, m) => s + m.revenueInclTax, 0);
   const expenseTotal = months.reduce((s, m) => s + m.totalExpense, 0);
@@ -178,44 +169,6 @@ export default async function AccountingDashboardPage() {
             </div>
           </div>
         )}
-      </section>
-
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-neutral-700">
-            当月: {formatYearMonth(currentYm)}
-          </h2>
-          <Link
-            href={`/accounting/months/${currentYm}`}
-            className="text-xs text-blue-700 hover:underline"
-          >
-            月次詳細を見る →
-          </Link>
-        </div>
-        {currentMonth ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <KpiCard label="売上（税込）" value={currentMonth.revenueInclTax} />
-            <KpiCard label="支出" value={currentMonth.totalExpense} />
-            <KpiCard
-              label="粗利"
-              value={currentMonth.grossProfit}
-              tone="positive"
-            />
-            <KpiCard
-              label="粗利率"
-              value={`${(Number(currentMonth.grossMarginRate) * 100).toFixed(1)}%`}
-            />
-          </div>
-        ) : (
-          <p className="text-sm text-neutral-500">
-            当月データはまだありません。
-          </p>
-        )}
-        {currentMonth?.memo ? (
-          <p className="mt-3 text-sm text-neutral-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-            メモ: {currentMonth.memo}
-          </p>
-        ) : null}
       </section>
     </div>
   );
