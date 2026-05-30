@@ -5,6 +5,7 @@ import {
   PRIORITY,
   PROFILE,
   ROADMAP,
+  STRATEGY_NOTE,
   SUPPLEMENTS,
   TRAINING_DAYS,
   WEIGHT_MGMT,
@@ -13,15 +14,17 @@ import { TRAINED_LABELS, type DailyReport, type ReportInput } from "./types";
 
 /** ベースプランを丸ごとテキスト化（AIへのコンテキスト） */
 export function planAsText(): string {
-  const roadmap = ROADMAP.map(
-    (w) =>
-      `  第${w.week}週(${w.range}) ${w.theme}: ` +
-      w.days.map((d) => `${d.label} ${d.menu}`).join(" / ")
-  ).join("\n");
+  const roadmap = ROADMAP.map((w) => {
+    const days = w.days
+      .map((d) => `    ${d.label} ${d.menu}${d.role ? `（${d.role}）` : ""}`)
+      .join("\n");
+    return `  第${w.week}週(${w.range}) ${w.theme}: ${w.note}\n${days}`;
+  }).join("\n");
 
   return `【ユーザー】${PROFILE.height} / ${PROFILE.weight} / ${PROFILE.age} / ${PROFILE.experience} / ${PROFILE.sleep} / ${PROFILE.work}
 【目標】${GOALS.deadline}までにベンチMAX ${GOALS.safe}kg（確実ライン）、${GOALS.bonus}kg（調子次第のボーナス）
 【現状】${PROFILE.pastMax}、${PROFILE.currentMax}
+【現状の見立て】${STRATEGY_NOTE}
 【弱点】${PROFILE.weakness}
 【トレ日】${TRAINING_DAYS}
 【栄養目標】${NUTRITION.kcal}kcal / P${NUTRITION.proteinG}g / C${NUTRITION.carbG}g / F${NUTRITION.fatG}g（${NUTRITION.note}）

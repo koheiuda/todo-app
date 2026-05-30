@@ -51,11 +51,22 @@ function WeekCard({ week, active }: { week: RoadmapWeek; active: boolean }) {
           {week.theme}
         </span>
       </div>
-      <ul className="space-y-1">
+      <p className="text-xs text-neutral-500 leading-relaxed mb-2">{week.note}</p>
+
+      <ul className="space-y-2">
         {week.days.map((d, i) => (
-          <li key={i} className="flex gap-2 text-sm">
-            <span className="text-neutral-400 shrink-0 w-16">{d.label}</span>
-            <span className="text-neutral-700 tabular-nums">{d.menu}</span>
+          <li key={i} className="text-sm">
+            <div className="flex gap-2">
+              <span className="text-neutral-400 shrink-0 w-16">{d.label}</span>
+              <span className="text-neutral-800 font-medium tabular-nums">
+                {d.menu}
+              </span>
+            </div>
+            {d.role && (
+              <p className="ml-[4.5rem] text-xs text-neutral-500 leading-snug">
+                {d.role}
+              </p>
+            )}
           </li>
         ))}
       </ul>
