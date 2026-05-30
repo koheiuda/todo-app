@@ -23,7 +23,7 @@ export function planAsText(): string {
   }).join("\n");
 
   return `【ユーザー】${PROFILE.height} / ${PROFILE.weight} / ${PROFILE.age} / ${PROFILE.experience} / ${PROFILE.sleep} / ${PROFILE.work}
-【目標】${GOALS.deadline}までにベンチMAX ${GOALS.safe}kg（確実ライン）、${GOALS.bonus}kg（調子次第のボーナス）
+【目標】${GOALS.deadline}までにベンチMAX ${GOALS.safe}kg を「必達」（死守ライン）、調子が良ければ ${GOALS.bonus}kg（ストレッチ）
 【現状】${PROFILE.pastMax}、${PROFILE.currentMax}
 【現状の見立て】${STRATEGY_NOTE}
 【弱点】${PROFILE.weakness}

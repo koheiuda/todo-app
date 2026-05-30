@@ -46,11 +46,11 @@ export function StrategyView() {
             <p className="text-xs text-white/60 mb-1">目標</p>
             <p className="text-lg font-bold">
               ベンチMAX{" "}
-              <span className="text-white">{GOALS.safe}kg</span>
-              <span className="text-white/70 text-sm">（確実）</span>{" "}
+              <span className="text-[#7da0ff]">{GOALS.safe}kg</span>
+              <span className="text-white/70 text-sm">（必達）</span>{" "}
               /{" "}
-              <span className="text-[#7da0ff]">{GOALS.bonus}kg</span>
-              <span className="text-white/70 text-sm">（ボーナス）</span>
+              <span className="text-white">{GOALS.bonus}kg</span>
+              <span className="text-white/70 text-sm">（ストレッチ）</span>
             </p>
             <p className="text-xs text-white/60 mt-1">
               {GOALS.deadline} ／ {activeWeek ? `第${activeWeek.week}週「${activeWeek.theme}」` : "—"}
@@ -73,7 +73,7 @@ export function StrategyView() {
       <section>
         <div className="rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/5 p-4">
           <p className="text-xs font-semibold text-[#15803d] mb-1">
-            ✅ 現状の見立て（MAX 105kg×1 が今出る前提）
+            🎯 115kg必達モードの見立て（MAX 105kg×1・初週80kg×3×4が余裕）
           </p>
           <p className="text-sm text-neutral-700 leading-relaxed">
             {STRATEGY_NOTE}

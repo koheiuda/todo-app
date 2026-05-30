@@ -107,7 +107,7 @@ export function TrainingApp() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-neutral-900">
-            🏋️ ベンチ {GOALS.safe}→{GOALS.bonus}kg コーチ
+            🏋️ ベンチ {GOALS.safe}kg必達 コーチ
           </h1>
         </div>
 

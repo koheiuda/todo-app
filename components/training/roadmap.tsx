@@ -12,10 +12,10 @@ export function Roadmap({ currentWeekNo }: { currentWeekNo: number | null }) {
       </div>
       <p className="text-xs text-neutral-500">
         目標：6月末までにベンチMAX{" "}
-        <span className="font-semibold text-neutral-700">{GOALS.safe}kg</span>
-        （確実ライン）／{" "}
-        <span className="font-semibold text-[#2d4fd4]">{GOALS.bonus}kg</span>
-        （ボーナス）。本番 6/29。
+        <span className="font-semibold text-[#2d4fd4]">{GOALS.safe}kg 必達</span>
+        ／ 調子が良ければ{" "}
+        <span className="font-semibold text-neutral-700">{GOALS.bonus}kg</span>
+        （ストレッチ）。本番 6/29。
       </p>
     </div>
   );
