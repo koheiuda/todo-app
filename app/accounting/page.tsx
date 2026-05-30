@@ -35,9 +35,11 @@ export default async function AccountingDashboardPage() {
     );
   }
 
-  const months = await listMonthlySummariesByPeriod(period.id);
   const currentYm = currentYearMonth();
-  const currentMonth = await getMonthlySummary(currentYm);
+  const [months, currentMonth] = await Promise.all([
+    listMonthlySummariesByPeriod(period.id),
+    getMonthlySummary(currentYm),
+  ]);
 
   const revenueTotal = months.reduce((s, m) => s + m.revenueInclTax, 0);
   const expenseTotal = months.reduce((s, m) => s + m.totalExpense, 0);
