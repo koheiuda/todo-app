@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTodo, type TodoView } from "@/components/todo/todo-context";
 import type { Workspace } from "@/lib/todo/types";
+import { StrategySidebar } from "@/components/training/strategy-sidebar";
 
 type ViewMenuItem = { id: TodoView; icon: string; label: string };
 type RouteMenuItem = { href: string; icon: string; label: string; badge?: number };
@@ -312,30 +313,35 @@ export function Sidebar() {
 
       {section === "training" && (
       /* ─── Box 4: 筋トレ ─── */
-      <div className="bg-white rounded-xl shadow-sm p-3">
-        <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
-          筋トレ
-        </p>
-        <nav className="space-y-1">
-          {trainingMenu.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                  isActive
-                    ? "bg-[#2d4fd4]/10 text-[#2d4fd4]"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <span className="text-base">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      <>
+        <div className="bg-white rounded-xl shadow-sm p-3">
+          <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
+            筋トレ
+          </p>
+          <nav className="space-y-1">
+            {trainingMenu.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                    isActive
+                      ? "bg-[#2d4fd4]/10 text-[#2d4fd4]"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="text-base">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* 「今日の報告」の下に 戦略・ロードマップを常時表示 */}
+        <StrategySidebar />
+      </>
       )}
 
       {contextMenu &&
