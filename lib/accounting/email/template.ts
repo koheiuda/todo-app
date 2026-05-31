@@ -42,12 +42,18 @@ ${SENDER_COMPANY}の宇田晃平です。
 ＝＝＝＝＝＝＝＝＝＝＝＝`;
 }
 
-/** 添付PDFのファイル名: 請求書_2026年5月_StockSun株式会社.pdf */
-export function buildAttachmentName(
+/** PDFファイル名（ダウンロード・メール添付 共通）:
+ *  【株式会社Mesut】2026年5月請求書_StockSun株式会社 御中.pdf */
+export function buildPdfFileName(
   yearMonth: string,
   clientName: string,
+  honorific = "御中",
 ): string {
   const { year, month } = parseYearMonth(yearMonth);
-  const safe = clientName.replace(/[\\/:*?"<>|]/g, "");
-  return `請求書_${year}年${month}月_${safe}.pdf`;
+  // ファイル名に使えない文字のみ除去（全角や空白・括弧はそのまま残す）
+  const safeName = clientName.replace(/[\\/:*?"<>|]/g, "");
+  return `【${SENDER_COMPANY}】${year}年${month}月請求書_${safeName} ${honorific}.pdf`;
 }
+
+/** @deprecated buildPdfFileName を使う */
+export const buildAttachmentName = buildPdfFileName;

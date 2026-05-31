@@ -5,7 +5,7 @@ import { sendInvoiceMail } from "@/lib/accounting/email/gmail";
 import {
   buildSubject,
   buildBody,
-  buildAttachmentName,
+  buildPdfFileName,
 } from "@/lib/accounting/email/template";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -81,7 +81,11 @@ export async function POST(
     invoice.client.honorific,
   );
   const body = buildBody(invoice.client.name, invoice.client.honorific);
-  const filename = buildAttachmentName(invoice.yearMonth, invoice.client.name);
+  const filename = buildPdfFileName(
+    invoice.yearMonth,
+    invoice.client.name,
+    invoice.client.honorific,
+  );
 
   try {
     await sendInvoiceMail({

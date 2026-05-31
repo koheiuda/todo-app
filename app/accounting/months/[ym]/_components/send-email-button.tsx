@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   buildSubject,
   buildBody,
-  buildAttachmentName,
+  buildPdfFileName,
 } from "@/lib/accounting/email/template";
 
 type InvoiceWithClient = Invoice & { client: Client | null };
@@ -42,7 +42,9 @@ export function SendEmailButton({ invoice }: { invoice: InvoiceWithClient }) {
   );
   const filename = useMemo(
     () =>
-      client ? buildAttachmentName(invoice.yearMonth, client.name) : "",
+      client
+        ? buildPdfFileName(invoice.yearMonth, client.name, client.honorific)
+        : "",
     [invoice.yearMonth, client],
   );
 
