@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 24,
+    marginBottom: 16,
   },
   clientBlock: {
     width: "55%",
@@ -85,12 +85,12 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
   },
   intro: {
-    marginVertical: 18,
+    marginVertical: 12,
     fontSize: 9,
   },
   summaryBoxes: {
     flexDirection: "row",
-    marginBottom: 24,
+    marginBottom: 16,
   },
   summaryCell: {
     flex: 1,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 0.5,
     borderBottomColor: "#171717",
-    minHeight: 20,
+    minHeight: 18,
   },
   tableCell: {
     paddingVertical: 4,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   bankBlock: {
-    marginTop: 30,
+    marginTop: 20,
   },
   bankTitle: {
     fontWeight: "bold",
@@ -239,11 +239,16 @@ function yen(n: number) {
   return `¥${n.toLocaleString("ja-JP")}`;
 }
 
-const ROWS_PER_PAGE = 17;
+// 1ページ（A4）に必ず収めるための行数設計。
+// 明細が少ないときは見栄えのため MIN_ROWS まで空行で埋め、
+// 多いときは MAX_ROWS まではそのまま表示する（それを超えると2ページになるので上限を設ける）。
+const MIN_ROWS = 8;
+const MAX_ROWS = 16;
 
 function padRows(items: InvoiceLineItemForPdf[]): InvoiceLineItemForPdf[] {
-  const padded = [...items];
-  while (padded.length < ROWS_PER_PAGE) {
+  const target = Math.min(Math.max(items.length, MIN_ROWS), MAX_ROWS);
+  const padded = items.slice(0, MAX_ROWS);
+  while (padded.length < target) {
     padded.push({
       description: "",
       deliveryDate: null,
@@ -288,7 +293,6 @@ export function InvoiceDocument({
             </View>
             <Text style={styles.companyName}>{company.name}</Text>
             <Text style={styles.smallText}>{company.address}</Text>
-            <Text style={styles.smallText}>電話：{company.tel}</Text>
           </View>
         </View>
 
