@@ -171,6 +171,9 @@ export const clients = pgTable("clients", {
   contactPerson: varchar("contact_person", { length: 128 }),
   contactEmail: varchar("contact_email", { length: 255 }),
   contactPhone: varchar("contact_phone", { length: 64 }),
+  // 請求書メール送付の宛先。会社ごとに TO 複数・CC 複数を登録できる。
+  invoiceEmails: text("invoice_emails").array().notNull().default([]),
+  invoiceCcEmails: text("invoice_cc_emails").array().notNull().default([]),
   billingNotes: text("billing_notes"),
   defaultMemo: text("default_memo"),
   isActive: boolean("is_active").notNull().default(true),

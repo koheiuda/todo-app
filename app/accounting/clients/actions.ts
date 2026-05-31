@@ -21,6 +21,14 @@ const ClientSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => null)),
   contactPhone: z.string().trim().nullable().optional(),
+  invoiceEmails: z
+    .array(z.string().trim().email("送付先メールの形式が不正です"))
+    .optional()
+    .default([]),
+  invoiceCcEmails: z
+    .array(z.string().trim().email("CCメールの形式が不正です"))
+    .optional()
+    .default([]),
   billingNotes: z.string().trim().nullable().optional(),
   defaultMemo: z.string().trim().nullable().optional(),
   isActive: z.boolean().default(true),
@@ -36,6 +44,8 @@ function normalize(input: z.infer<typeof ClientSchema>) {
     contactPerson: input.contactPerson || null,
     contactEmail: input.contactEmail || null,
     contactPhone: input.contactPhone || null,
+    invoiceEmails: input.invoiceEmails ?? [],
+    invoiceCcEmails: input.invoiceCcEmails ?? [],
     billingNotes: input.billingNotes || null,
     defaultMemo: input.defaultMemo || null,
     isActive: input.isActive,

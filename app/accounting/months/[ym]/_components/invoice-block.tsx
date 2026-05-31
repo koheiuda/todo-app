@@ -17,6 +17,7 @@ import {
   updateLineItem,
 } from "../actions";
 import { IssuePdfButton } from "./issue-pdf-button";
+import { SendEmailButton } from "./send-email-button";
 import { NumberCell, TextCell, TextareaCell } from "./editable-cells";
 import { DragHandle } from "./drag-handle";
 import type { RowDnd } from "./use-row-dnd";
@@ -169,7 +170,10 @@ function InvoiceFirstRow({
         rowSpan={spanCount}
         className="px-2 py-2 text-center align-top border-r border-neutral-200"
       >
-        <IssuePdfButton invoice={invoice} />
+        <div className="flex flex-col items-center gap-1">
+          <IssuePdfButton invoice={invoice} />
+          <SendEmailButton invoice={invoice} />
+        </div>
       </td>
       <td
         rowSpan={spanCount}

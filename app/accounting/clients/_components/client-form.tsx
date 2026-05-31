@@ -13,6 +13,8 @@ const EMPTY: ClientFormValues = {
   contactPerson: null,
   contactEmail: null,
   contactPhone: null,
+  invoiceEmails: [],
+  invoiceCcEmails: [],
   billingNotes: null,
   defaultMemo: null,
   isActive: true,
@@ -43,6 +45,8 @@ export function ClientForm({
           contactPerson: initial.contactPerson ?? null,
           contactEmail: initial.contactEmail ?? null,
           contactPhone: initial.contactPhone ?? null,
+          invoiceEmails: initial.invoiceEmails ?? [],
+          invoiceCcEmails: initial.invoiceCcEmails ?? [],
           billingNotes: initial.billingNotes ?? null,
           defaultMemo: initial.defaultMemo ?? null,
           isActive: initial.isActive ?? true,
@@ -137,6 +141,41 @@ export function ClientForm({
             onChange={(e) => setStr("address", e.target.value)}
             placeholder="東京都品川区..."
             className="acc-input"
+          />
+        </Field>
+
+        <Field label="請求書メール送付先 TO（1行に1件）" full>
+          <textarea
+            value={values.invoiceEmails.join("\n")}
+            onChange={(e) =>
+              set(
+                "invoiceEmails",
+                e.target.value
+                  .split("\n")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              )
+            }
+            placeholder={"keiri@example.com\ntanto@example.com"}
+            rows={2}
+            className="acc-input font-sans"
+          />
+        </Field>
+        <Field label="請求書メール CC（1行に1件）" full>
+          <textarea
+            value={values.invoiceCcEmails.join("\n")}
+            onChange={(e) =>
+              set(
+                "invoiceCcEmails",
+                e.target.value
+                  .split("\n")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              )
+            }
+            placeholder={"cc1@example.com\ncc2@example.com"}
+            rows={2}
+            className="acc-input font-sans"
           />
         </Field>
 

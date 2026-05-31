@@ -14,6 +14,8 @@ export type ClientFormValues = {
   contactPerson: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  invoiceEmails: string[];
+  invoiceCcEmails: string[];
   billingNotes: string | null;
   defaultMemo: string | null;
   isActive: boolean;
