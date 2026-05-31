@@ -12,6 +12,7 @@ import {
   restoreLineItem,
   toggleInvoicePaid,
   toggleInvoiceSent,
+  updateClientName,
   updateInvoiceAmount,
   updateInvoiceMemo,
   updateLineItem,
@@ -120,9 +121,27 @@ function InvoiceFirstRow({
       </td>
       <td
         rowSpan={spanCount}
-        className="px-3 py-2 font-medium text-neutral-900 align-top border-r border-neutral-200 whitespace-nowrap"
+        className="px-2 py-2 font-medium text-neutral-900 align-top border-r border-neutral-200 whitespace-nowrap"
       >
-        {invoice.client?.name ?? "—"}
+        {invoice.client ? (
+          <TextCell
+            initial={invoice.client.name}
+            save={(v) =>
+              start(async () => {
+                await updateClientName(
+                  invoice.client!.id,
+                  v,
+                  invoice.yearMonth,
+                );
+              })
+            }
+            placeholder="請求先名"
+            ariaLabel="請求先名"
+            className="font-medium whitespace-nowrap"
+          />
+        ) : (
+          "—"
+        )}
       </td>
       <td
         rowSpan={spanCount}

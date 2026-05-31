@@ -134,6 +134,23 @@ export async function reorderInvoices(yearMonth: string, orderedIds: string[]) {
   revalidatePath(`/accounting/months/${yearMonth}`);
 }
 
+/** 請求先（会社名）を月次画面から直接更新する。clients テーブルを更新するため
+ *  この請求先の全請求書に反映される。 */
+export async function updateClientName(
+  clientId: string,
+  name: string,
+  yearMonth: string,
+) {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("会社名を入力してください");
+  await getDb()
+    .update(clients)
+    .set({ name: trimmed, updatedAt: new Date() })
+    .where(eq(clients.id, clientId));
+  revalidatePath(`/accounting/months/${yearMonth}`);
+  revalidatePath("/accounting/clients");
+}
+
 /** 外注費の表示順を保存（D&D後）。 */
 export async function reorderOutsourcing(
   yearMonth: string,
