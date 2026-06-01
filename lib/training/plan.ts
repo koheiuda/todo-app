@@ -137,6 +137,120 @@ export const TRAINING_DAYS = "月・水・金（週3）";
 export const PRIORITY =
   "6月は「筋トレ目標 > 仕事」を優先";
 
+/* ──────────────────────────────────────────────
+ * 回復・筋肉痛(DOMS)対策（超回復）
+ * deep-research（99研究メタ分析ほか・2026-06-01検証）に基づく。
+ * 本人の現状（睡眠6h・P155g≒2.2g/kg・クレアチン5g済み）に合わせて
+ * 優先順位を最適化している。画面・AIコンテキスト共通。
+ * ────────────────────────────────────────────── */
+
+/** 5/30の胸トレ痛が6/1も残る課題への見立て */
+export const RECOVERY_NOTE =
+  "5/30の胸トレの痛みが6/1も残るのは、DOMS（遅発性筋肉痛）のピークが24〜72時間という生理に沿った“正常範囲”。久々・高ボリュームの初回は特に長引く。カギは『同じ刺激を繰り返すほどDOMSは軽くなる』反復ボート効果（repeated bout effect）。最初の2〜3週は1回目を抑えめにして回数を重ねれば、中1日でも回せる体に変わっていく。万能の“超回復最速化”は存在せず、(1)回復を妨げない設計＋(2)効果の確かな少数の介入、の合わせ技が合理的。";
+
+export type RecoveryLever = {
+  /** 優先度（1が最優先） */
+  rank: number;
+  /** 施策名 */
+  title: string;
+  /** 具体的にどうするか（本人の状況に合わせた指示） */
+  how: string;
+  /** エビデンスの要点（出典名込み） */
+  evidence: string;
+  /** 確度 */
+  grade: "高" | "中";
+};
+
+/** 効くレバー（本人最適化の優先順）。上から効果が確かで、本人の伸びしろが大きい順 */
+export const RECOVERY_LEVERS: RecoveryLever[] = [
+  {
+    rank: 1,
+    title: "睡眠を 6h → 7〜9h に（最優先・最大のレバー）",
+    how: "現状6hが回復面の最大ボトルネック。就寝・起床時刻を固定し、最低7h、可能なら7.5〜9hを確保。特にトレ日の夜は死守。",
+    evidence:
+      "睡眠不足(4h×5夜)で筋修復の中核=筋原線維タンパク質合成(MyoPS)が低下。運動はその低下を部分的に防ぐが、睡眠の確保が前提（Saner 2020, J Physiol）。",
+    grade: "高",
+  },
+  {
+    rank: 2,
+    title: "就寝前にタンパク質 40g",
+    how: "総量（現状P155g≒2.2g/kg）は十分。配分を見直し、就寝前にカゼイン系40g前後（ギリシャヨーグルト／カッテージチーズ／カゼインプロテイン）を足すと夜間の修復が伸びる。",
+    evidence:
+      "就寝前40gで睡眠中の筋タンパク質合成が約+22%（Res 2012／Trommelen 2016）。タンパク質は約1.3g/kgでプラトーだがトレ併用で高用量も有効（Tagawa 2021）。",
+    grade: "高",
+  },
+  {
+    rank: 3,
+    title: "マッサージ・フォームローラー ＋ 温浴／コントラスト浴",
+    how: "筋肉痛を実際に軽くしたいなら、胸・三頭を軽くマッサージ/フォームローラー。入浴は温浴やコントラスト浴（温冷交代）。回復目的ではサウナ単体より温冷交代が向く。",
+    evidence:
+      "99研究メタ分析でDOMS回復に最も強いのはマッサージ、次いで冷水浴・コントラスト浴。ストレッチ・軽い有酸素・電気刺激は有意差なし（Dupuy 2018, Front Physiol）。",
+    grade: "高",
+  },
+  {
+    rank: 4,
+    title: "最初は抑えめ → 段階的に増やす（漸進性）",
+    how: "痛みが残る間は同部位の高強度反復を避け、重量・セット・RPEを1〜2割落とす。初回後の2〜3週で段階的に戻すと、同じ刺激への痛みが自然に減っていく。",
+    evidence:
+      "反復ボート効果＝同一刺激を繰り返すほどDOMSが軽減。各筋群は週2回以上が筋肥大に有利で、要はボリュームを管理しつつ積むこと（Schoenfeld 2016）。",
+    grade: "中",
+  },
+  {
+    rank: 5,
+    title: "サプリ：クレアチン継続＋オメガ3・クルクミンは補助",
+    how: "クレアチン5g/日は継続でOK。オメガ3(EPA/DHA)とクルクミン（吸収性の高い製剤）は日常のベース栄養として。ただし筋肉痛が劇的に消えるほどの体感は期待しない。",
+    evidence:
+      "回復栄養で相対的に最有力はタルトチェリーとオメガ3、クルクミン等は中程度（Barnes 2023）。オメガ3は48hのDOMSを有意に減らすが臨床的最小差未満（Lv 2020）、クルクミンは筋肉痛・CK低下に有意（Beba 2022）。",
+    grade: "中",
+  },
+];
+
+export type RecoveryMyth = { myth: string; truth: string };
+
+/** やりがちな誤解・逆効果 */
+export const RECOVERY_MYTHS: RecoveryMyth[] = [
+  {
+    myth: "トレ直後に冷水浴・アイシングすると回復が早まる",
+    truth:
+      "筋肉痛“軽減”には効くが、トレ直後の冷水浴は筋肥大・筋力の長期適応を有意に抑制（Roberts 2015）。増量・筋肥大が目的の今は直後の冷水浴を避け、温浴・コントラスト浴・マッサージを選ぶ。回復優先の調整期（第4週・本番直前）に限定使用ならOK。",
+  },
+  {
+    myth: "ストレッチをすれば筋肉痛は消える",
+    truth:
+      "ストレッチはDOMSを意味あるレベルでは減らさない（Dupuy 2018／Cochrane Herbert 2011）。気持ちよさはあるが“治療”ではない。",
+  },
+  {
+    myth: "トレ後30分以内（ゴールデンタイム）に飲まないと無駄",
+    truth:
+      "アナボリックウィンドウは従来言われたほど狭くない。直前・直後と3時間ずらした摂取でも筋力・体組成に差なし（Lak 2024）。1日の総量と配分を優先すればよい。",
+  },
+];
+
+/** 中1日（48時間間隔）の胸トレを回すための実践プロトコル */
+export const RECOVERY_PROTOCOL: string[] = [
+  "痛みが残る日は、痛む部位の高強度反復を避け重量・セットを1〜2割落とす（完全休養より軽く動かす方が回復向き）",
+  "最初の2〜3週は“1回目を抑えめ”に。回数を重ねるほど痛みは軽くなる（反復ボート効果）",
+  "睡眠は最低7h死守。トレ日の夜は特に優先する",
+  "就寝前にタンパク質40g。1日P150g前後を数回に分けて確保（直後に焦って飲む必要はない）",
+  "トレ直後の冷水浴・アイシングは避ける（筋肥大目的）。マッサージ/フォームローラー＋温浴・コントラスト浴で回復",
+  "痛みのピークは24〜72h。72h超で強い痛み・力が出ないなら、その部位はもう1日空けるかボリュームを減らす",
+];
+
+export type RecoverySource = { label: string; url: string };
+
+/** 出典（検証済み一次・メタ分析中心） */
+export const RECOVERY_SOURCES: RecoverySource[] = [
+  { label: "Dupuy 2018 (Front Physiol) 回復手段の99研究メタ分析", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5932411/" },
+  { label: "Roberts 2015 (J Physiol) 冷水浴と筋適応", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4594298/" },
+  { label: "Barnes 2023 (Nutrients) 回復のための栄養レビュー", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10255909/" },
+  { label: "Lv 2020 オメガ3とDOMSの12RCTメタ分析", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC7195643/" },
+  { label: "Beba 2022 (Phytother Res) クルクミンの用量反応メタ分析", url: "https://pubmed.ncbi.nlm.nih.gov/35574627/" },
+  { label: "Tagawa 2021 (Nutr Rev) タンパク質の用量反応メタ分析", url: "https://academic.oup.com/nutritionreviews/article/79/1/66/5936522" },
+  { label: "Trommelen & van Loon 2016 (Nutrients) 就寝前タンパク質", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5188418/" },
+  { label: "Saner 2020 (J Physiol) 睡眠不足と筋タンパク質合成", url: "https://physoc.onlinelibrary.wiley.com/doi/full/10.1113/JP278828" },
+  { label: "Schoenfeld 2016 トレ頻度のメタ分析", url: "https://pubmed.ncbi.nlm.nih.gov/27102172/" },
+];
+
 export const ROADMAP: RoadmapWeek[] = [
   {
     week: 1,
