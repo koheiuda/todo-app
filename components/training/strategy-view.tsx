@@ -9,6 +9,11 @@ import {
   PHASE_FLOW,
   PRIORITY,
   PROFILE,
+  RECOVERY_LEVERS,
+  RECOVERY_MYTHS,
+  RECOVERY_NOTE,
+  RECOVERY_PROTOCOL,
+  RECOVERY_SOURCES,
   STRATEGY_NOTE,
   SUPPLEMENTS,
   TRAINING_DAYS,
@@ -169,6 +174,123 @@ export function StrategyView() {
             {SUPPLEMENTS}
           </InfoCard>
         </div>
+      </section>
+
+      {/* ── 回復・筋肉痛対策（超回復） ── */}
+      <section>
+        <h2 className="text-sm font-semibold text-neutral-700 mb-1">
+          回復・筋肉痛対策（超回復）
+        </h2>
+        <p className="text-xs text-neutral-500 mb-3">
+          中1日（48時間間隔）で胸トレを回すための、エビデンスに基づく回復戦略。
+        </p>
+
+        {/* 見立て */}
+        <div className="rounded-xl border border-[#f59e0b]/30 bg-[#f59e0b]/5 p-4 mb-3">
+          <p className="text-xs font-semibold text-[#b45309] mb-1">
+            🩹 5/30の筋肉痛が今日(6/1)も残る件の見立て
+          </p>
+          <p className="text-sm text-neutral-700 leading-relaxed">
+            {RECOVERY_NOTE}
+          </p>
+        </div>
+
+        {/* 効くレバー（優先順） */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          効くレバー（上から優先）
+        </p>
+        <div className="flex flex-col gap-2 mb-4">
+          {RECOVERY_LEVERS.map((lever) => (
+            <div
+              key={lever.rank}
+              className="rounded-xl border border-neutral-200 bg-white p-4"
+            >
+              <div className="flex items-start gap-3">
+                <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#2d4fd4] text-white text-xs font-bold">
+                  {lever.rank}
+                </span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-neutral-900">
+                      {lever.title}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        lever.grade === "高"
+                          ? "bg-[#22c55e]/15 text-[#15803d]"
+                          : "bg-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      エビデンス{lever.grade}
+                    </span>
+                  </div>
+                  <p className="text-sm text-neutral-700 leading-relaxed mt-1">
+                    {lever.how}
+                  </p>
+                  <p className="text-xs text-neutral-400 leading-relaxed mt-1.5">
+                    {lever.evidence}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* やりがちな誤解・逆効果 */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          やりがちな誤解・逆効果
+        </p>
+        <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 mb-4">
+          {RECOVERY_MYTHS.map((m) => (
+            <div key={m.myth} className="px-4 py-3">
+              <p className="text-sm font-medium text-[#dc2626]">
+                ✕ {m.myth}
+              </p>
+              <p className="text-sm text-neutral-700 leading-relaxed mt-1">
+                <span className="font-semibold text-[#15803d]">→ </span>
+                {m.truth}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* 中1日プロトコル */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          中1日を回す実践プロトコル
+        </p>
+        <ul className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 mb-4">
+          {RECOVERY_PROTOCOL.map((step, i) => (
+            <li key={i} className="flex gap-3 px-4 py-2.5">
+              <span className="shrink-0 text-[#2d4fd4] font-bold text-sm">
+                {i + 1}
+              </span>
+              <span className="text-sm text-neutral-700 leading-relaxed">
+                {step}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        {/* 出典 */}
+        <details className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+          <summary className="text-xs font-semibold text-neutral-500 cursor-pointer">
+            出典（メタ分析・一次研究 {RECOVERY_SOURCES.length}件）
+          </summary>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {RECOVERY_SOURCES.map((s) => (
+              <li key={s.url} className="text-xs leading-relaxed">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#2d4fd4] hover:underline break-all"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
       </section>
     </div>
   );
