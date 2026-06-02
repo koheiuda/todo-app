@@ -22,6 +22,14 @@ import {
   daysUntilPeak,
   toYmd,
 } from "@/lib/training/plan";
+import {
+  DOMS_PHYSIOLOGY,
+  LEVER_DETAILS,
+  RECOVERY_TIMELINE,
+  SORENESS_DECISION,
+  SUPPLEMENT_TABLE,
+  THERMAL_MATRIX,
+} from "@/lib/training/recovery";
 import { Roadmap } from "./roadmap";
 
 /**
@@ -195,6 +203,26 @@ export function StrategyView() {
           </p>
         </div>
 
+        {/* DOMSの生理学 */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          なぜ痛む・なぜ長引く（DOMSの生理学）
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+          {DOMS_PHYSIOLOGY.map((p) => (
+            <div
+              key={p.heading}
+              className="rounded-xl border border-neutral-200 bg-white p-4"
+            >
+              <p className="text-sm font-semibold text-neutral-900 mb-1">
+                {p.heading}
+              </p>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                {p.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
         {/* 効くレバー（優先順） */}
         <p className="text-xs font-semibold text-neutral-500 mb-2">
           効くレバー（上から優先）
@@ -227,7 +255,31 @@ export function StrategyView() {
                   <p className="text-sm text-neutral-700 leading-relaxed mt-1">
                     {lever.how}
                   </p>
-                  <p className="text-xs text-neutral-400 leading-relaxed mt-1.5">
+                  {(() => {
+                    const detail = LEVER_DETAILS.find(
+                      (d) => d.rank === lever.rank
+                    );
+                    if (!detail) return null;
+                    return (
+                      <>
+                        <ul className="mt-2 space-y-1">
+                          {detail.steps.map((s, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-neutral-700 leading-relaxed flex gap-1.5"
+                            >
+                              <span className="text-[#2d4fd4]">・</span>
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-[#15803d] bg-[#22c55e]/10 rounded px-2 py-1 mt-2 inline-block">
+                          🎯 目標：{detail.target}
+                        </p>
+                      </>
+                    );
+                  })()}
+                  <p className="text-xs text-neutral-400 leading-relaxed mt-2">
                     {lever.evidence}
                   </p>
                 </div>
@@ -254,6 +306,98 @@ export function StrategyView() {
           ))}
         </div>
 
+        {/* 温冷療法の使い分け */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          サウナ・風呂・冷却の使い分け（増量期＝今の可否つき）
+        </p>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-sm bg-white rounded-xl border border-neutral-200 border-separate border-spacing-0">
+            <thead>
+              <tr className="text-xs text-neutral-500">
+                <th className="text-left font-semibold px-3 py-2">手段</th>
+                <th className="text-left font-semibold px-3 py-2">タイミング</th>
+                <th className="text-center font-semibold px-3 py-2 whitespace-nowrap">今OK?</th>
+                <th className="text-left font-semibold px-3 py-2">狙い・注意</th>
+              </tr>
+            </thead>
+            <tbody>
+              {THERMAL_MATRIX.map((t) => (
+                <tr key={t.method} className="border-t border-neutral-100 align-top">
+                  <td className="px-3 py-2 font-medium text-neutral-800">
+                    {t.method}
+                  </td>
+                  <td className="px-3 py-2 text-neutral-600 whitespace-nowrap">
+                    {t.timing}
+                  </td>
+                  <td
+                    className={`px-3 py-2 text-center text-lg font-bold ${
+                      t.bulkOk === "×"
+                        ? "text-[#dc2626]"
+                        : t.bulkOk === "△"
+                          ? "text-[#b45309]"
+                          : "text-[#15803d]"
+                    }`}
+                  >
+                    {t.bulkOk}
+                  </td>
+                  <td className="px-3 py-2 text-neutral-600 leading-relaxed">
+                    <span className="font-medium text-neutral-700">{t.purpose}</span>
+                    <br />
+                    {t.note}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* サプリ早見表 */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          サプリ早見表（回復・DOMS観点）
+        </p>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-sm bg-white rounded-xl border border-neutral-200 border-separate border-spacing-0">
+            <thead>
+              <tr className="text-xs text-neutral-500">
+                <th className="text-left font-semibold px-3 py-2">サプリ</th>
+                <th className="text-left font-semibold px-3 py-2 whitespace-nowrap">用量</th>
+                <th className="text-left font-semibold px-3 py-2">タイミング</th>
+                <th className="text-center font-semibold px-3 py-2 whitespace-nowrap">推奨</th>
+                <th className="text-left font-semibold px-3 py-2">効果・備考</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SUPPLEMENT_TABLE.map((s) => (
+                <tr key={s.name} className="border-t border-neutral-100 align-top">
+                  <td className="px-3 py-2 font-medium text-neutral-800 whitespace-nowrap">
+                    {s.name}
+                  </td>
+                  <td className="px-3 py-2 text-neutral-600 whitespace-nowrap">
+                    {s.dose}
+                  </td>
+                  <td className="px-3 py-2 text-neutral-600">{s.timing}</td>
+                  <td className="px-3 py-2 text-center whitespace-nowrap">
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        s.rec === "継続" || s.rec === "推奨"
+                          ? "bg-[#22c55e]/15 text-[#15803d]"
+                          : s.rec === "限定"
+                            ? "bg-[#f59e0b]/15 text-[#b45309]"
+                            : "bg-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      {s.rec}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-neutral-600 leading-relaxed">
+                    {s.effect}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         {/* 中1日プロトコル */}
         <p className="text-xs font-semibold text-neutral-500 mb-2">
           中1日を回す実践プロトコル
@@ -270,6 +414,50 @@ export function StrategyView() {
             </li>
           ))}
         </ul>
+
+        {/* トレ日の1日タイムライン */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          トレ日の過ごし方（回復を最大化する1日）
+        </p>
+        <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 mb-4">
+          {RECOVERY_TIMELINE.map((slot) => (
+            <div
+              key={slot.time}
+              className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-3 px-4 py-2.5"
+            >
+              <span className="text-sm font-semibold text-[#2d4fd4] whitespace-nowrap">
+                {slot.time}
+              </span>
+              <span className="text-sm text-neutral-700 leading-relaxed">
+                {slot.action}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* 痛みが残る日の判断フロー */}
+        <p className="text-xs font-semibold text-neutral-500 mb-2">
+          痛みが残る日、トレすべき？（判断フロー）
+        </p>
+        <div className="flex flex-col gap-2 mb-4">
+          {SORENESS_DECISION.map((r) => (
+            <div
+              key={r.level}
+              className="rounded-xl border border-neutral-200 bg-white p-4"
+            >
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="text-sm font-semibold text-neutral-900">
+                  {r.level}
+                </span>
+                <span className="text-xs text-neutral-400">{r.sign}</span>
+              </div>
+              <p className="text-sm text-neutral-700 leading-relaxed">
+                <span className="font-semibold text-[#2d4fd4]">→ </span>
+                {r.action}
+              </p>
+            </div>
+          ))}
+        </div>
 
         {/* 出典 */}
         <details className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
