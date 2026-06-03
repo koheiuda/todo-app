@@ -18,7 +18,9 @@ export type RowDnd = {
  * - handleProps(id): ハンドル要素に展開（mousedown でその行をドラッグ可能化）
  * - 並びが変わったら persist(orderedIds) を呼ぶ（楽観的更新）
  *
- * 親側は initial の id 集合が変わったとき key で再マウントして state をリセットする想定。
+ * サーバーアクション(revalidatePath)で新しい initial が降ってきたら items を同期する。
+ * これをしないと useState の初期値がマウント時に固まり、チェックボックス・発行状態など
+ * 行内フィールドの更新が強制リロードまで反映されない（id集合は不変なので key 再マウントでも救えない）。
  */
 export function useRowDnd<T extends { id: string }>(
   initial: T[],
@@ -28,6 +30,15 @@ export function useRowDnd<T extends { id: string }>(
   const dragId = useRef<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [enabledId, setEnabledId] = useState<string | null>(null);
+
+  // 受け取った initial の内容(順序＋行内フィールド)が変わったら state を同期。
+  // ドラッグ中は楽観的な並びを壊さないよう同期を見送る。
+  const sig = JSON.stringify(initial);
+  const [prevSig, setPrevSig] = useState(sig);
+  if (sig !== prevSig && dragId.current === null) {
+    setItems(initial);
+    setPrevSig(sig);
+  }
 
   function cleanup() {
     dragId.current = null;
