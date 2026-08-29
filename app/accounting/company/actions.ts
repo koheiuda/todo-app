@@ -2,6 +2,7 @@
 
 import { getDb } from "@/lib/db";
 import { companySettings } from "@/lib/db/schema";
+import { normalizePayeeName } from "@/lib/accounting/transfer/kana";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -20,6 +21,19 @@ const CompanySchema = z.object({
     .or(z.literal("").transform(() => null)),
   invoiceNumber: z.string().trim().nullable().optional(),
   bankInfo: z.string().trim().nullable().optional(),
+  // 総合振込（全銀フォーマット）のヘッダーに入れる委託者情報。
+  // 未入力のまま保存できてよい（振込を実行する段階で検証される）。
+  consignorCode: z.string().trim().nullable().optional(),
+  consignorNameKana: z.string().trim().nullable().optional(),
+  transferBankCode: z.string().trim().nullable().optional(),
+  transferBankNameKana: z.string().trim().nullable().optional(),
+  transferBranchCode: z.string().trim().nullable().optional(),
+  transferBranchNameKana: z.string().trim().nullable().optional(),
+  transferDepositType: z
+    .enum(["ordinary", "checking", "savings", "other"])
+    .nullable()
+    .optional(),
+  transferAccountNumber: z.string().trim().nullable().optional(),
 });
 
 export async function updateCompanySettings(input: unknown) {
@@ -32,6 +46,21 @@ export async function updateCompanySettings(input: unknown) {
     email: data.email || null,
     invoiceNumber: data.invoiceNumber || null,
     bankInfo: data.bankInfo || null,
+    consignorCode: data.consignorCode || null,
+    // カナ項目は保存時に半角カナへ寄せる。全銀に通らない表記のまま持たないため。
+    consignorNameKana: data.consignorNameKana
+      ? normalizePayeeName(data.consignorNameKana)
+      : null,
+    transferBankCode: data.transferBankCode || null,
+    transferBankNameKana: data.transferBankNameKana
+      ? normalizePayeeName(data.transferBankNameKana)
+      : null,
+    transferBranchCode: data.transferBranchCode || null,
+    transferBranchNameKana: data.transferBranchNameKana
+      ? normalizePayeeName(data.transferBranchNameKana)
+      : null,
+    transferDepositType: data.transferDepositType ?? "ordinary",
+    transferAccountNumber: data.transferAccountNumber || null,
     updatedAt: new Date(),
   };
 

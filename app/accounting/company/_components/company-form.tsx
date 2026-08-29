@@ -1,5 +1,6 @@
 "use client";
 
+import type { DepositType } from "@/lib/accounting/transfer/zengin";
 import type { CompanySettings } from "@/lib/db/schema";
 import { useState, useTransition } from "react";
 import { updateCompanySettings } from "../actions";
@@ -12,7 +13,22 @@ type FormValues = {
   email: string | null;
   invoiceNumber: string | null;
   bankInfo: string | null;
+  consignorCode: string | null;
+  consignorNameKana: string | null;
+  transferBankCode: string | null;
+  transferBankNameKana: string | null;
+  transferBranchCode: string | null;
+  transferBranchNameKana: string | null;
+  transferDepositType: DepositType;
+  transferAccountNumber: string | null;
 };
+
+const DEPOSIT_OPTIONS: Array<{ value: DepositType; label: string }> = [
+  { value: "ordinary", label: "普通" },
+  { value: "checking", label: "当座" },
+  { value: "savings", label: "貯蓄" },
+  { value: "other", label: "その他" },
+];
 
 export function CompanyForm({ initial }: { initial: CompanySettings }) {
   const [values, setValues] = useState<FormValues>({
@@ -23,6 +39,15 @@ export function CompanyForm({ initial }: { initial: CompanySettings }) {
     email: initial.email,
     invoiceNumber: initial.invoiceNumber,
     bankInfo: initial.bankInfo,
+    consignorCode: initial.consignorCode,
+    consignorNameKana: initial.consignorNameKana,
+    transferBankCode: initial.transferBankCode,
+    transferBankNameKana: initial.transferBankNameKana,
+    transferBranchCode: initial.transferBranchCode,
+    transferBranchNameKana: initial.transferBranchNameKana,
+    transferDepositType: (initial.transferDepositType ??
+      "ordinary") as DepositType,
+    transferAccountNumber: initial.transferAccountNumber,
   });
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +149,119 @@ export function CompanyForm({ initial }: { initial: CompanySettings }) {
             PDFの「お振込先」欄にそのまま表示されます。複数行可。
           </p>
         </Field>
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-neutral-200">
+        <h2 className="text-sm font-semibold text-neutral-900">
+          総合振込（振込元）
+        </h2>
+        <p className="text-xs text-neutral-500 mt-1 mb-4">
+          外注費を一括振込するときに、全銀フォーマットのヘッダーへ入る自社情報です。
+          委託者コードはGMOあおぞらネット銀行から払い出されます。
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="委託者コード（10桁）">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={values.consignorCode ?? ""}
+              onChange={(e) =>
+                setStr("consignorCode", e.target.value.replace(/\D/g, ""))
+              }
+              maxLength={10}
+              placeholder="1234567890"
+              className="acc-input"
+            />
+          </Field>
+          <Field label="委託者名（カナ）">
+            <input
+              type="text"
+              value={values.consignorNameKana ?? ""}
+              onChange={(e) => setStr("consignorNameKana", e.target.value)}
+              placeholder="カ)メスト"
+              className="acc-input"
+            />
+          </Field>
+
+          <Field label="金融機関コード（4桁）">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={values.transferBankCode ?? ""}
+              onChange={(e) =>
+                setStr("transferBankCode", e.target.value.replace(/\D/g, ""))
+              }
+              maxLength={4}
+              placeholder="0310"
+              className="acc-input"
+            />
+          </Field>
+          <Field label="金融機関名（カナ）">
+            <input
+              type="text"
+              value={values.transferBankNameKana ?? ""}
+              onChange={(e) => setStr("transferBankNameKana", e.target.value)}
+              placeholder="ジーエムオーアオゾラ"
+              className="acc-input"
+            />
+          </Field>
+
+          <Field label="支店コード（3桁）">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={values.transferBranchCode ?? ""}
+              onChange={(e) =>
+                setStr("transferBranchCode", e.target.value.replace(/\D/g, ""))
+              }
+              maxLength={3}
+              placeholder="101"
+              className="acc-input"
+            />
+          </Field>
+          <Field label="支店名（カナ）">
+            <input
+              type="text"
+              value={values.transferBranchNameKana ?? ""}
+              onChange={(e) => setStr("transferBranchNameKana", e.target.value)}
+              placeholder="ホウジンエイギョウブ"
+              className="acc-input"
+            />
+          </Field>
+
+          <Field label="預金種目">
+            <select
+              value={values.transferDepositType}
+              onChange={(e) =>
+                set("transferDepositType", e.target.value as DepositType)
+              }
+              className="acc-input"
+            >
+              {DEPOSIT_OPTIONS.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="口座番号（7桁以内）">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={values.transferAccountNumber ?? ""}
+              onChange={(e) =>
+                setStr(
+                  "transferAccountNumber",
+                  e.target.value.replace(/\D/g, ""),
+                )
+              }
+              maxLength={7}
+              placeholder="2091728"
+              className="acc-input"
+            />
+          </Field>
+        </div>
       </div>
 
       {error ? <p className="mt-4 text-xs text-rose-700">{error}</p> : null}

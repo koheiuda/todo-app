@@ -9,8 +9,13 @@ import {
 } from "@/lib/accounting/queries";
 import { formatYearMonth, formatYen } from "@/lib/accounting/utils";
 import Link from "next/link";
+import {
+  getTransferPlan,
+  listTransferBatches,
+} from "@/lib/accounting/transfer/queries";
 import { AddInvoiceRow } from "./_components/add-invoice-row";
 import { AddOutsourcingRow } from "./_components/add-outsourcing-row";
+import { BulkTransferButton } from "./_components/bulk-transfer-button";
 import { CopyPreviousMonthButton } from "./_components/copy-previous-month-button";
 import { InvoiceTableBody } from "./_components/invoice-table-body";
 import { OutsourcingTableBody } from "./_components/outsourcing-table-body";
@@ -38,6 +43,10 @@ export default async function MonthDetailPage({
   const lineItemsByInvoice = await listLineItemsByInvoiceIds(
     invoices.map((i) => i.id),
   );
+  const [{ plan: transferPlan }, transferBatches] = await Promise.all([
+    getTransferPlan(ym),
+    listTransferBatches(ym),
+  ]);
 
   const revenueInclTotal = invoices.reduce((s, i) => s + i.amountInclTax, 0);
   const revenueExclTotal = invoices.reduce((s, i) => s + i.amountExclTax, 0);
@@ -212,7 +221,20 @@ export default async function MonthDetailPage({
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[13px] font-semibold text-neutral-700">外注費</h2>
-          <AddOutsourcingRow yearMonth={ym} />
+          <div className="flex items-center gap-2">
+            <BulkTransferButton
+              yearMonth={ym}
+              plan={transferPlan}
+              pastBatches={transferBatches.map((b) => ({
+                id: b.id,
+                transferDate: b.transferDate,
+                itemCount: b.itemCount,
+                totalAmount: b.totalAmount,
+                createdAt: b.createdAt.toISOString(),
+              }))}
+            />
+            <AddOutsourcingRow yearMonth={ym} />
+          </div>
         </div>
         <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto max-w-3xl">
           <table className="w-full text-[13px]">

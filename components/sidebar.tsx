@@ -23,6 +23,7 @@ const routeMenu: RouteMenuItem[] = [
 const accountingMenu: RouteMenuItem[] = [
   { href: "/accounting", icon: "📊", label: "ダッシュボード" },
   { href: "/accounting/company", icon: "🏢", label: "自社情報" },
+  { href: "/accounting/payees", icon: "🏦", label: "振込先口座" },
   { href: "/accounting/import", icon: "📥", label: "データ移行" },
 ];
 

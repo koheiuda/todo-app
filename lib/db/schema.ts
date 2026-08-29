@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   pgTable,
   uuid,
   varchar,
@@ -120,6 +121,14 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "paid",
 ]);
 
+/** 全銀の預金種目。コード値への変換は lib/accounting/transfer/zengin.ts が持つ。 */
+export const depositTypeEnum = pgEnum("deposit_type", [
+  "ordinary",
+  "checking",
+  "savings",
+  "other",
+]);
+
 export const fiscalPeriods = pgTable("fiscal_periods", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 64 }).notNull(),
@@ -232,6 +241,14 @@ export const outsourcingCosts = pgTable("outsourcing_costs", {
   yearMonth: varchar("year_month", { length: 7 }).notNull(),
   contractorName: varchar("contractor_name", { length: 255 }).notNull(),
   amountInclTax: integer("amount_incl_tax").notNull().default(0),
+  /**
+   * 振込先口座（payee_accounts）への参照。未設定なら contractor_name で引き当てる。
+   * 口座を消しても外注費の記録は残したいので on delete set null。
+   */
+  payeeAccountId: uuid("payee_account_id").references(
+    (): AnyPgColumn => payeeAccounts.id,
+    { onDelete: "set null" },
+  ),
   memo: text("memo"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -250,7 +267,21 @@ export const companySettings = pgTable("company_settings", {
   tel: varchar("tel", { length: 64 }),
   email: varchar("email", { length: 255 }),
   invoiceNumber: varchar("invoice_number", { length: 32 }),
+  /** 請求書PDFに印字する振込先案内（自由記述）。総合振込には使わない。 */
   bankInfo: text("bank_info"),
+  // ─ 総合振込（全銀フォーマット）のヘッダーに入れる自社=委託者情報 ─
+  /** 銀行から払い出される委託者コード（10桁） */
+  consignorCode: varchar("consignor_code", { length: 10 }),
+  /** 委託者名（全銀40桁枠の半角カナ） */
+  consignorNameKana: varchar("consignor_name_kana", { length: 40 }),
+  transferBankCode: varchar("transfer_bank_code", { length: 4 }),
+  transferBankNameKana: varchar("transfer_bank_name_kana", { length: 15 }),
+  transferBranchCode: varchar("transfer_branch_code", { length: 3 }),
+  transferBranchNameKana: varchar("transfer_branch_name_kana", { length: 15 }),
+  transferDepositType: depositTypeEnum("transfer_deposit_type").default(
+    "ordinary",
+  ),
+  transferAccountNumber: varchar("transfer_account_number", { length: 7 }),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -314,3 +345,68 @@ export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
 export type OutsourcingCost = typeof outsourcingCosts.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
 export type CompanySettings = typeof companySettings.$inferSelect;
+
+// ─────────────────────────────────────────────────────────────
+// 振込（総合振込・全銀フォーマット）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 外注先の振込口座マスタ。
+ * 金額は月ごとに変わるが口座は変わらないので、outsourcing_costs とは分けて持つ。
+ * カナ項目は全銀に通る半角カナで保存する（保存時に normalizePayeeName で正規化）。
+ */
+export const payeeAccounts = pgTable(
+  "payee_accounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** 表示用の外注先名（漢字可）。outsourcing_costs.contractor_name と対応させる。 */
+    contractorName: varchar("contractor_name", { length: 255 }).notNull(),
+    bankCode: varchar("bank_code", { length: 4 }).notNull(),
+    bankNameKana: varchar("bank_name_kana", { length: 15 }).notNull(),
+    branchCode: varchar("branch_code", { length: 3 }).notNull(),
+    branchNameKana: varchar("branch_name_kana", { length: 15 }).notNull(),
+    depositType: depositTypeEnum("deposit_type").notNull().default("ordinary"),
+    accountNumber: varchar("account_number", { length: 7 }).notNull(),
+    /** 受取人名（全銀の30桁枠に入る半角カナ） */
+    payeeNameKana: varchar("payee_name_kana", { length: 30 }).notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    memo: text("memo"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("payee_accounts_contractor_name_uq").on(t.contractorName)],
+);
+
+/**
+ * 総合振込ファイルを書き出した履歴。
+ * 「同じ月を二重に振り込む」事故を防ぐため、書き出した事実と内容を残す。
+ * ファイルを作っただけでは入金は発生せず、実際の実行は銀行側の承認による。
+ */
+export const transferBatches = pgTable(
+  "transfer_batches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    yearMonth: varchar("year_month", { length: 7 }).notNull(),
+    /** 振込指定日 */
+    transferDate: date("transfer_date", { mode: "string" }).notNull(),
+    itemCount: integer("item_count").notNull(),
+    totalAmount: integer("total_amount").notNull(),
+    /** 書き出した明細のスナップショット（後から突合できるように内容ごと残す） */
+    items: jsonb("items").notNull(),
+    /** 銀行へアップロードして承認済みにしたら true にする運用フラグ */
+    isSubmitted: boolean("is_submitted").notNull().default(false),
+    memo: text("memo"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("transfer_batches_year_month_idx").on(t.yearMonth)],
+);
+
+export type PayeeAccount = typeof payeeAccounts.$inferSelect;
+export type NewPayeeAccount = typeof payeeAccounts.$inferInsert;
+export type TransferBatch = typeof transferBatches.$inferSelect;
