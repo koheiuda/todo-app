@@ -43,10 +43,8 @@ export default async function MonthDetailPage({
   const lineItemsByInvoice = await listLineItemsByInvoiceIds(
     invoices.map((i) => i.id),
   );
-  const [{ plan: transferPlan }, transferBatches] = await Promise.all([
-    getTransferPlan(ym),
-    listTransferBatches(ym),
-  ]);
+  const [{ plan: transferPlan, migrationPending }, transferBatches] =
+    await Promise.all([getTransferPlan(ym), listTransferBatches(ym)]);
 
   const revenueInclTotal = invoices.reduce((s, i) => s + i.amountInclTax, 0);
   const revenueExclTotal = invoices.reduce((s, i) => s + i.amountExclTax, 0);
@@ -225,6 +223,7 @@ export default async function MonthDetailPage({
             <BulkTransferButton
               yearMonth={ym}
               plan={transferPlan}
+              migrationPending={migrationPending}
               pastBatches={transferBatches.map((b) => ({
                 id: b.id,
                 transferDate: b.transferDate,

@@ -43,7 +43,16 @@ export async function POST(
     return NextResponse.json({ error: "振込指定日が不正です" }, { status: 400 });
   }
 
-  const { plan, remitter } = await getTransferPlan(ym);
+  const { plan, remitter, migrationPending } = await getTransferPlan(ym);
+  if (migrationPending) {
+    return NextResponse.json(
+      {
+        error:
+          "振込機能のセットアップが未完了です（scripts/migrate-add-payee-accounts.ts を実行してください）",
+      },
+      { status: 409 },
+    );
+  }
   if (!remitter) {
     return NextResponse.json(
       { error: "会社設定（振込元口座）が未登録です" },

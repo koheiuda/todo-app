@@ -19,7 +19,6 @@ export interface OutsourcingLike {
   id: string;
   contractorName: string;
   amountInclTax: number;
-  payeeAccountId: string | null;
 }
 
 /** payee_accounts の必要な部分。 */
@@ -69,15 +68,14 @@ export interface TransferPlan {
   totalAmount: number;
 }
 
-/** 口座マスタを引き当てる。payee_account_id が最優先、無ければ外注先名で一致を見る。 */
+/**
+ * 口座マスタを外注先名で引き当てる。
+ * payee_accounts.contractor_name は一意なので、名前が一致すれば1件に定まる。
+ */
 function findAccount(
   row: OutsourcingLike,
   accounts: PayeeAccountLike[],
 ): PayeeAccountLike | null {
-  if (row.payeeAccountId) {
-    const byId = accounts.find((a) => a.id === row.payeeAccountId);
-    if (byId) return byId;
-  }
   const name = row.contractorName.trim();
   return accounts.find((a) => a.contractorName.trim() === name) ?? null;
 }

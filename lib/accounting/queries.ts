@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
+import { isMissingSchemaError } from "@/lib/accounting/db-errors";
 import {
   clients,
   companySettings,
@@ -221,27 +222,82 @@ export async function getMonthOutsourcingTotal(
   return Number(rows[0]?.total ?? 0);
 }
 
-export async function getCompanySettings(): Promise<CompanySettings> {
+/**
+ * 総合振込のカラム追加より前のDBでも読めるよう、旧カラムだけを明示して取得する。
+ * 請求書PDFの生成もここを通るため、マイグレーション前に落とすわけにはいかない。
+ */
+async function selectLegacyCompanySettings(): Promise<CompanySettings | undefined> {
   const rows = await getDb()
-    .select()
+    .select({
+      id: companySettings.id,
+      name: companySettings.name,
+      postalCode: companySettings.postalCode,
+      address: companySettings.address,
+      tel: companySettings.tel,
+      email: companySettings.email,
+      invoiceNumber: companySettings.invoiceNumber,
+      bankInfo: companySettings.bankInfo,
+      updatedAt: companySettings.updatedAt,
+    })
     .from(companySettings)
     .where(eq(companySettings.id, "default"))
     .limit(1);
+  const row = rows[0];
+  if (!row) return undefined;
+  return {
+    ...row,
+    consignorCode: null,
+    consignorNameKana: null,
+    transferBankCode: null,
+    transferBankNameKana: null,
+    transferBranchCode: null,
+    transferBranchNameKana: null,
+    transferDepositType: null,
+    transferAccountNumber: null,
+  };
+}
+
+export async function getCompanySettings(): Promise<CompanySettings> {
+  let rows: CompanySettings[];
+  try {
+    rows = await getDb()
+      .select()
+      .from(companySettings)
+      .where(eq(companySettings.id, "default"))
+      .limit(1);
+  } catch (e) {
+    if (!isMissingSchemaError(e)) throw e;
+    // 振込用カラムがまだ無いDB。旧カラムだけで読み直す。
+    const legacy = await selectLegacyCompanySettings();
+    if (legacy) return legacy;
+    rows = [];
+  }
   if (rows[0]) return rows[0];
-  const inserted = await getDb()
-    .insert(companySettings)
-    .values({
-      id: "default",
-      name: process.env.COMPANY_NAME ?? "株式会社Mesut",
-      postalCode: null,
-      address: process.env.COMPANY_ADDRESS ?? null,
-      tel: process.env.COMPANY_TEL ?? null,
-      email: null,
-      invoiceNumber: process.env.COMPANY_INVOICE_NUMBER ?? null,
-      bankInfo: process.env.COMPANY_BANK_INFO ?? null,
-    })
-    .returning();
-  return inserted[0];
+
+  const seed = {
+    id: "default",
+    name: process.env.COMPANY_NAME ?? "株式会社Mesut",
+    postalCode: null,
+    address: process.env.COMPANY_ADDRESS ?? null,
+    tel: process.env.COMPANY_TEL ?? null,
+    email: null,
+    invoiceNumber: process.env.COMPANY_INVOICE_NUMBER ?? null,
+    bankInfo: process.env.COMPANY_BANK_INFO ?? null,
+  };
+
+  try {
+    const inserted = await getDb()
+      .insert(companySettings)
+      .values(seed)
+      .returning();
+    return inserted[0];
+  } catch (e) {
+    if (!isMissingSchemaError(e)) throw e;
+    // returning() も全カラムを返そうとするため、旧カラムだけで読み直す。
+    const legacy = await selectLegacyCompanySettings();
+    if (legacy) return legacy;
+    throw e;
+  }
 }
 
 export async function getMonthExpenseTotal(

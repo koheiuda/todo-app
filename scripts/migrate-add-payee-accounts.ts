@@ -2,9 +2,9 @@
 //   - deposit_type ENUM
 //   - payee_accounts（外注先の振込口座マスタ）
 //   - transfer_batches（振込ファイル書き出し履歴）
-//   - outsourcing_costs.payee_account_id
 //   - company_settings の委託者・自社口座カラム
-// 非破壊（CREATE / ADD COLUMN はすべて IF NOT EXISTS）。既存データは触らない。
+// 非破壊。既存テーブル（outsourcing_costs / invoices など）には一切触れないため、
+// このマイグレーションを流す前のコードがそのまま動き続ける。
 // 実行: npx tsx --env-file=.env.local scripts/migrate-add-payee-accounts.ts --apply
 
 import { sql } from "drizzle-orm";
@@ -66,12 +66,6 @@ async function main() {
             ON transfer_batches (year_month)`,
     ],
     [
-      "outsourcing_costs.payee_account_id を追加",
-      sql`ALTER TABLE outsourcing_costs
-            ADD COLUMN IF NOT EXISTS payee_account_id uuid
-            REFERENCES payee_accounts(id) ON DELETE SET NULL`,
-    ],
-    [
       "company_settings に委託者・自社口座カラムを追加",
       sql`ALTER TABLE company_settings
             ADD COLUMN IF NOT EXISTS consignor_code varchar(10),
@@ -98,16 +92,6 @@ async function main() {
     await db.execute(statement);
     console.log(`✔ ${label}`);
   }
-
-  // 既存の外注費を、同名の口座マスタがあれば自動で紐付ける。
-  await db.execute(sql`
-    UPDATE outsourcing_costs o
-    SET payee_account_id = p.id
-    FROM payee_accounts p
-    WHERE o.payee_account_id IS NULL
-      AND o.contractor_name = p.contractor_name
-  `);
-  console.log("✔ 同名の外注費と口座マスタを紐付け");
 
   process.exit(0);
 }

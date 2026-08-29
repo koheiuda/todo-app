@@ -48,10 +48,13 @@ export function BulkTransferButton({
   yearMonth,
   plan,
   pastBatches,
+  migrationPending = false,
 }: {
   yearMonth: string;
   plan: TransferPlan;
   pastBatches: PastBatch[];
+  /** 振込用テーブルが未作成（マイグレーション未実行）か。 */
+  migrationPending?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [transferDate, setTransferDate] = useState(() =>
@@ -62,7 +65,10 @@ export function BulkTransferButton({
   const router = useRouter();
 
   const canSubmit =
-    plan.ready.length > 0 && plan.remitterErrors.length === 0 && !pending;
+    !migrationPending &&
+    plan.ready.length > 0 &&
+    plan.remitterErrors.length === 0 &&
+    !pending;
 
   function download() {
     setError(null);
@@ -142,6 +148,20 @@ export function BulkTransferButton({
               総合振込（全銀フォーマット）のファイルを作成します。GMOあおぞらネット銀行に
               アップロードして承認するまで、出金は発生しません。
             </p>
+
+            {migrationPending ? (
+              <div className="mb-4 text-xs bg-amber-50 border border-amber-200 rounded px-3 py-2 text-amber-900">
+                <div className="font-medium mb-1">
+                  振込機能のセットアップが済んでいません
+                </div>
+                振込先口座を保存するテーブルがまだ作成されていません。
+                次のコマンドを実行してください。
+                <pre className="mt-1.5 bg-white/70 border border-amber-200 rounded px-2 py-1 overflow-x-auto text-[11px]">
+                  npx tsx --env-file=.env.local
+                  scripts/migrate-add-payee-accounts.ts --apply
+                </pre>
+              </div>
+            ) : null}
 
             {pastBatches.length > 0 ? (
               <div className="mb-4 text-xs bg-amber-50 border border-amber-200 rounded px-3 py-2 text-amber-900">

@@ -1,11 +1,17 @@
 import { PageHeader } from "@/components/accounting/page-header";
-import { listPayeeAccounts } from "@/lib/accounting/transfer/queries";
+import {
+  isTransferSchemaReady,
+  listPayeeAccounts,
+} from "@/lib/accounting/transfer/queries";
 import { PayeeList } from "./_components/payee-list";
 
 export const dynamic = "force-dynamic";
 
 export default async function PayeesPage() {
-  const accounts = await listPayeeAccounts();
+  const [accounts, schemaReady] = await Promise.all([
+    listPayeeAccounts(),
+    isTransferSchemaReady(),
+  ]);
 
   return (
     <div>
@@ -13,6 +19,22 @@ export default async function PayeesPage() {
         title="振込先口座"
         description="外注費の総合振込に使う口座。外注先名は外注費の名称と一致させると自動で紐付きます。"
       />
+
+      {schemaReady ? null : (
+        <div className="mb-6 text-xs bg-amber-50 border border-amber-200 rounded-md px-3 py-3 max-w-3xl text-amber-900">
+          <div className="font-medium mb-1">
+            振込機能のセットアップが済んでいません
+          </div>
+          <p className="mb-2">
+            振込先口座を保存するテーブルがまだ作成されていないため、登録しても保存できません。
+            先に次のコマンドを実行してください。
+          </p>
+          <pre className="bg-white/70 border border-amber-200 rounded px-2 py-1 overflow-x-auto text-[11px]">
+            npx tsx --env-file=.env.local
+            scripts/migrate-add-payee-accounts.ts --apply
+          </pre>
+        </div>
+      )}
 
       <div className="mb-6 text-xs text-neutral-600 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 max-w-3xl">
         受取人名は通帳の表記どおりに入力してください。全銀フォーマットは半角カナ30文字までで、

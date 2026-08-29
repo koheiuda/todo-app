@@ -207,18 +207,27 @@ const goodRemitter: RemitterLike = {
   transferDepositType: "ordinary", transferAccountNumber: "1234567",
 };
 
-check("口座IDで引き当てる", () => {
+check("外注先名が違えば引き当てない", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "別名でもよい", amountInclTax: 125820, payeeAccountId: "a1" }],
+    outsourcing: [{ id: "o1", contractorName: "別名", amountInclTax: 125820 }],
+    accounts: [acct()],
+    remitter: goodRemitter,
+  });
+  assert.equal(plan.ready.length, 0);
+  assert.deepEqual(plan.blocked[0].errors, ["振込先口座が未登録です"]);
+});
+check("前後の空白は無視して引き当てる", () => {
+  const plan = buildTransferPlan({
+    outsourcing: [{ id: "o1", contractorName: "  安島愛 ", amountInclTax: 125820 }],
     accounts: [acct()],
     remitter: goodRemitter,
   });
   assert.equal(plan.ready.length, 1);
   assert.equal(plan.totalAmount, 125820);
 });
-check("IDが無ければ外注先名で引き当てる", () => {
+check("外注先名で引き当てる", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000, payeeAccountId: null }],
+    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000 }],
     accounts: [acct()],
     remitter: goodRemitter,
   });
@@ -226,7 +235,7 @@ check("IDが無ければ外注先名で引き当てる", () => {
 });
 check("口座未登録は理由付きでblockedへ", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "知らない人", amountInclTax: 1000, payeeAccountId: null }],
+    outsourcing: [{ id: "o1", contractorName: "知らない人", amountInclTax: 1000 }],
     accounts: [acct()],
     remitter: goodRemitter,
   });
@@ -236,7 +245,7 @@ check("口座未登録は理由付きでblockedへ", () => {
 });
 check("無効化された口座は振込まない", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000, payeeAccountId: null }],
+    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000 }],
     accounts: [acct({ isActive: false })],
     remitter: goodRemitter,
   });
@@ -244,7 +253,7 @@ check("無効化された口座は振込まない", () => {
 });
 check("金額0の行はそもそも対象外", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 0, payeeAccountId: null }],
+    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 0 }],
     accounts: [acct()],
     remitter: goodRemitter,
   });
@@ -254,8 +263,8 @@ check("金額0の行はそもそも対象外", () => {
 check("合計はready分のみ", () => {
   const plan = buildTransferPlan({
     outsourcing: [
-      { id: "o1", contractorName: "安島愛", amountInclTax: 125820, payeeAccountId: null },
-      { id: "o2", contractorName: "知らない人", amountInclTax: 99999, payeeAccountId: null },
+      { id: "o1", contractorName: "安島愛", amountInclTax: 125820 },
+      { id: "o2", contractorName: "知らない人", amountInclTax: 99999 },
     ],
     accounts: [acct()],
     remitter: goodRemitter,
@@ -273,7 +282,7 @@ check("委託者が揃っていればエラーなし", () => {
 });
 check("toZenginInput は委託者不足で例外", () => {
   const plan = buildTransferPlan({
-    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000, payeeAccountId: null }],
+    outsourcing: [{ id: "o1", contractorName: "安島愛", amountInclTax: 1000 }],
     accounts: [acct()],
     remitter: null,
   });
@@ -286,8 +295,8 @@ check("toZenginInput は対象0件で例外", () => {
 check("プランから全銀ファイルまで通る", () => {
   const plan = buildTransferPlan({
     outsourcing: [
-      { id: "o1", contractorName: "安島愛", amountInclTax: 125820, payeeAccountId: null },
-      { id: "o2", contractorName: "株式会社Optimum", amountInclTax: 55000, payeeAccountId: "a2" },
+      { id: "o1", contractorName: "安島愛", amountInclTax: 125820 },
+      { id: "o2", contractorName: "株式会社Optimum", amountInclTax: 55000 },
     ],
     accounts: [acct(), acct({ id: "a2", contractorName: "株式会社Optimum", payeeNameKana: "ｶ)OPTIMUM", accountNumber: "7654321" })],
     remitter: goodRemitter,

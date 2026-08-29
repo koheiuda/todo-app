@@ -1,5 +1,4 @@
 import {
-  type AnyPgColumn,
   pgTable,
   uuid,
   varchar,
@@ -241,14 +240,6 @@ export const outsourcingCosts = pgTable("outsourcing_costs", {
   yearMonth: varchar("year_month", { length: 7 }).notNull(),
   contractorName: varchar("contractor_name", { length: 255 }).notNull(),
   amountInclTax: integer("amount_incl_tax").notNull().default(0),
-  /**
-   * 振込先口座（payee_accounts）への参照。未設定なら contractor_name で引き当てる。
-   * 口座を消しても外注費の記録は残したいので on delete set null。
-   */
-  payeeAccountId: uuid("payee_account_id").references(
-    (): AnyPgColumn => payeeAccounts.id,
-    { onDelete: "set null" },
-  ),
   memo: text("memo"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -359,7 +350,10 @@ export const payeeAccounts = pgTable(
   "payee_accounts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    /** 表示用の外注先名（漢字可）。outsourcing_costs.contractor_name と対応させる。 */
+    /**
+     * 外注先名（漢字可）。outsourcing_costs.contractor_name と同じ文字列で突き合わせる。
+     * outsourcing_costs 側にはカラムを足さない方針なので、この名前が唯一の結合キー。
+     */
     contractorName: varchar("contractor_name", { length: 255 }).notNull(),
     bankCode: varchar("bank_code", { length: 4 }).notNull(),
     bankNameKana: varchar("bank_name_kana", { length: 15 }).notNull(),
