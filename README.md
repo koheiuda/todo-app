@@ -32,6 +32,7 @@ npm run dev
 | `X_REDIRECT_URI` | `${origin}/api/auth/x/callback` |
 | `CRON_SECRET` | Vercel Cron 認可用シークレット |
 | `NEXTAUTH_SECRET` / `NEXTAUTH_URL` | NextAuth |
+| `GITHUB_TOKEN` | Claude Code ダッシュボード用。GitHub の読み取り専用トークン（`GH_TOKEN` でも可） |
 
 ## 手動Cronトリガ（開発時）
 
@@ -64,8 +65,16 @@ lib/
   x/                       # OAuth + tokens + post (ツリー投稿対応)
   config/                  # personas, RSS feed list
 
+app/claude-code/           # Claude Code ダッシュボード（概要 / ブランチ一覧）
+
+lib/claude-code/
+  github.ts                # GitHub GraphQL 取得＋5分キャッシュ
+  naming.ts                # ブランチ名 → 日本語ラベル変換
+  summary.ts               # 要整理判定・KPI集計
+
 components/
   ui/                      # shadcn/ui
+  claude-code/             # ダッシュボードUI
   tweet-editor.tsx         # 4案タブ＋編集＋予約UI
 ```
 
@@ -96,6 +105,40 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 Vercel では Settings → Environment Variables に `ANTHROPIC_API_KEY` を
 Production / Preview / Development それぞれ設定すれば本番でも動作する。
+
+## Claude Code タブ（`/claude-code`）
+
+Claude Code で作ったリポジトリ・ブランチが増えて管理しきれない・ブランチ名が
+英字だけで中身が分からない、という課題に対して **視認性を上げるためのダッシュボード**。
+
+- ヘッダーの「Claude Code」タブから開く。データは GitHub GraphQL API から取得。
+- **ブランチ名を日本語に読み替えて表示する。** 変換辞書と種別判定は
+  [lib/claude-code/naming.ts](./lib/claude-code/naming.ts)。
+  例：`claude/todo-accounting-improvements-0iwz13` → `[Claude生成] ToDo・会計・改善`
+  （`claude/` 系ブランチ末尾の自動生成文字列は落とす。元のブランチ名も併記するので情報は失わない）
+- 表示内容
+  - KPI：リポジトリ数／ブランチ総数／**要整理ブランチ**（30日以上更新なし）／オープンPR／直近30日のコミット数（Claude関与率つき）
+  - 直近30日のコミット推移グラフ（Claude 分とそれ以外を積み上げ表示）
+  - リポジトリ別カード（ブランチ数・要整理数・オープンPR・最近動いたブランチ）
+  - [`/claude-code/branches`](./app/claude-code/branches/page.tsx)：全ブランチ横断の検索・絞り込み・並び替え
+- 各ブランチには最新コミットメッセージを併記する。コミットメッセージは日本語なので、
+  ブランチ名だけより中身が分かりやすい。
+
+### 必要な環境変数
+
+`GITHUB_TOKEN`（読み取り専用の Personal Access Token）。未設定の場合はエラーにならず、
+画面に設定手順が表示される。
+
+```bash
+# .env.local（ローカル）
+GITHUB_TOKEN=ghp_...
+```
+
+Vercel では Settings → Environment Variables に `GITHUB_TOKEN` を設定する。
+**必要な権限は repo の読み取りのみ。** 書き込み権限は付けないこと。
+
+> GitHub API の呼びすぎを防ぐため、取得結果はサーバー側で5分間キャッシュする
+> （[lib/claude-code/github.ts](./lib/claude-code/github.ts)）。
 
 ## デプロイ（Vercel）
 

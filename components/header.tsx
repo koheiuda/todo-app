@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTodo } from "@/components/todo/todo-context";
 
 type Section = {
-  id: "todo" | "news" | "accounting" | "training";
+  id: "todo" | "news" | "accounting" | "training" | "claude-code";
   label: string;
   href: string;
   isActive: (pathname: string) => boolean;
@@ -40,6 +40,12 @@ const SECTIONS: Section[] = [
     href: "/training",
     isActive: (p) => p.startsWith("/training"),
   },
+  {
+    id: "claude-code",
+    label: "Claude Code",
+    href: "/claude-code",
+    isActive: (p) => p.startsWith("/claude-code"),
+  },
 ];
 
 export function Header() {
@@ -50,14 +56,14 @@ export function Header() {
   return (
     <header className="bg-[#1e2a4a] text-white px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
           {SECTIONS.map((s) => {
             const active = s.isActive(pathname);
             return (
               <Link
                 key={s.id}
                 href={s.href}
-                className={`px-4 py-1.5 rounded-md text-base md:text-lg font-bold tracking-wide transition-colors ${
+                className={`shrink-0 px-3 md:px-4 py-1.5 rounded-md text-sm md:text-lg font-bold tracking-wide whitespace-nowrap transition-colors ${
                   active
                     ? "bg-white text-[#1e2a4a]"
                     : "text-white/80 hover:bg-white/10"

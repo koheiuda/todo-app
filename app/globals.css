@@ -131,3 +131,12 @@
     @apply font-sans;
   }
 }
+
+/* ヘッダーのタブが増えた際、横スクロールバーを隠して見た目を保つ */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

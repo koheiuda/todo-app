@@ -26,14 +26,20 @@ const accountingMenu: RouteMenuItem[] = [
   { href: "/accounting/import", icon: "📥", label: "データ移行" },
 ];
 
+const claudeCodeMenu: RouteMenuItem[] = [
+  { href: "/claude-code", icon: "🤖", label: "概要" },
+  { href: "/claude-code/branches", icon: "🌿", label: "ブランチ一覧" },
+];
+
 const trainingMenu: RouteMenuItem[] = [
   { href: "/training", icon: "🏋️", label: "今日の報告" },
   { href: "/training/strategy", icon: "🗺️", label: "戦略・ロードマップ" },
 ];
 
-type Section = "todo" | "news" | "accounting" | "training";
+type Section = "todo" | "news" | "accounting" | "training" | "claude-code";
 
 function detectSection(pathname: string): Section {
+  if (pathname.startsWith("/claude-code")) return "claude-code";
   if (pathname.startsWith("/accounting")) return "accounting";
   if (pathname.startsWith("/training")) return "training";
   if (pathname === "/") return "todo";
@@ -311,8 +317,39 @@ export function Sidebar() {
       </div>
       )}
 
+      {section === "claude-code" && (
+      /* ─── Box 4: Claude Code ─── */
+      <div className="bg-white rounded-xl shadow-sm p-3">
+        <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
+          Claude Code
+        </p>
+        <nav className="space-y-1">
+          {claudeCodeMenu.map((item) => {
+            const isActive =
+              item.href === "/claude-code"
+                ? pathname === "/claude-code"
+                : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                  isActive
+                    ? "bg-[#2d4fd4]/10 text-[#2d4fd4]"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-base">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+      )}
+
       {section === "training" && (
-      /* ─── Box 4: 筋トレ ─── */
+      /* ─── Box 5: 筋トレ ─── */
       <div className="bg-white rounded-xl shadow-sm p-3">
         <p className="px-3 pt-1 pb-2 text-xs font-semibold text-[#2d4fd4] uppercase tracking-wide">
           筋トレ
